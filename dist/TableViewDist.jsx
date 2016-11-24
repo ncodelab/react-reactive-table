@@ -1,23 +1,21 @@
 import React from 'react'
+import ReactDOM from 'react-dom';
 
-const parser = (function () {
+const parser = (function() {
   "use strict";
 
   function peg$subclass(child, parent) {
-    function ctor() {
-      this.constructor = child;
-    }
-
+    function ctor() { this.constructor = child; }
     ctor.prototype = parent.prototype;
     child.prototype = new ctor();
   }
 
   function peg$SyntaxError(message, expected, found, location) {
-    this.message = message;
+    this.message  = message;
     this.expected = expected;
-    this.found = found;
+    this.found    = found;
     this.location = location;
-    this.name = "SyntaxError";
+    this.name     = "SyntaxError";
 
     if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, peg$SyntaxError);
@@ -26,13 +24,13 @@ const parser = (function () {
 
   peg$subclass(peg$SyntaxError, Error);
 
-  peg$SyntaxError.buildMessage = function (expected, found) {
+  peg$SyntaxError.buildMessage = function(expected, found) {
     var DESCRIBE_EXPECTATION_FNS = {
-      literal: function (expectation) {
+      literal: function(expectation) {
         return "\"" + literalEscape(expectation.text) + "\"";
       },
 
-      "class": function (expectation) {
+      "class": function(expectation) {
         var escapedParts = "",
             i;
 
@@ -45,15 +43,15 @@ const parser = (function () {
         return "[" + (expectation.inverted ? "^" : "") + escapedParts + "]";
       },
 
-      any: function (expectation) {
+      any: function(expectation) {
         return "any character";
       },
 
-      end: function (expectation) {
+      end: function(expectation) {
         return "end of input";
       },
 
-      other: function (expectation) {
+      other: function(expectation) {
         return expectation.description;
       }
     };
@@ -65,17 +63,13 @@ const parser = (function () {
     function literalEscape(s) {
       return s
           .replace(/\\/g, '\\\\')
-          .replace(/"/g, '\\"')
+          .replace(/"/g,  '\\"')
           .replace(/\0/g, '\\0')
           .replace(/\t/g, '\\t')
           .replace(/\n/g, '\\n')
           .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g, function (ch) {
-            return '\\x0' + hex(ch);
-          })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
-            return '\\x' + hex(ch);
-          });
+          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
+          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
     }
 
     function classEscape(s) {
@@ -83,17 +77,13 @@ const parser = (function () {
           .replace(/\\/g, '\\\\')
           .replace(/\]/g, '\\]')
           .replace(/\^/g, '\\^')
-          .replace(/-/g, '\\-')
+          .replace(/-/g,  '\\-')
           .replace(/\0/g, '\\0')
           .replace(/\t/g, '\\t')
           .replace(/\n/g, '\\n')
           .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g, function (ch) {
-            return '\\x0' + hex(ch);
-          })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
-            return '\\x' + hex(ch);
-          });
+          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
+          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
     }
 
     function describeExpectation(expectation) {
@@ -146,15 +136,15 @@ const parser = (function () {
 
     var peg$FAILED = {},
 
-        peg$startRuleFunctions = {Expression: peg$parseExpression},
-        peg$startRuleFunction = peg$parseExpression,
+        peg$startRuleFunctions = { Expression: peg$parseExpression },
+        peg$startRuleFunction  = peg$parseExpression,
 
         peg$c0 = "&&",
         peg$c1 = peg$literalExpectation("&&", false),
         peg$c2 = "||",
         peg$c3 = peg$literalExpectation("||", false),
-        peg$c4 = function (head, tail) {
-          return tail.reduce(function (result, element) {
+        peg$c4 = function(head, tail) {
+          return tail.reduce(function(result, element) {
             return {
               'l': result,
               'r': element[3],
@@ -180,8 +170,8 @@ const parser = (function () {
         peg$c20 = peg$literalExpectation("}", false),
         peg$c21 = "{",
         peg$c22 = peg$literalExpectation("{", false),
-        peg$c23 = function (head, tail) {
-          return tail.reduce(function (result, element) {
+        peg$c23 = function(head, tail) {
+          return tail.reduce(function(result, element) {
             return {
               'col': result[1],
               'act': element[1],
@@ -189,9 +179,7 @@ const parser = (function () {
             }
           }, head);
         },
-        peg$c24 = function (chars) {
-          return chars.join("");
-        },
+        peg$c24 = function(chars) {return chars.join("");},
         peg$c25 = /^[a-zA-Z0-9]/,
         peg$c26 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"]], false, false),
         peg$c27 = /^[ \t\n\r]/,
@@ -199,12 +187,12 @@ const parser = (function () {
         peg$c29 = /^["]/,
         peg$c30 = peg$classExpectation(["\""], false, false),
 
-        peg$currPos = 0,
-        peg$savedPos = 0,
-        peg$posDetailsCache = [{line: 1, column: 1}],
-        peg$maxFailPos = 0,
-        peg$maxFailExpected = [],
-        peg$silentFails = 0,
+        peg$currPos          = 0,
+        peg$savedPos         = 0,
+        peg$posDetailsCache  = [{ line: 1, column: 1 }],
+        peg$maxFailPos       = 0,
+        peg$maxFailExpected  = [],
+        peg$silentFails      = 0,
 
         peg$result;
 
@@ -241,28 +229,23 @@ const parser = (function () {
     }
 
     function peg$literalExpectation(text, ignoreCase) {
-      return {type: "literal", text: text, ignoreCase: ignoreCase};
+      return { type: "literal", text: text, ignoreCase: ignoreCase };
     }
 
     function peg$classExpectation(parts, inverted, ignoreCase) {
-      return {
-        type: "class",
-        parts: parts,
-        inverted: inverted,
-        ignoreCase: ignoreCase
-      };
+      return { type: "class", parts: parts, inverted: inverted, ignoreCase: ignoreCase };
     }
 
     function peg$anyExpectation() {
-      return {type: "any"};
+      return { type: "any" };
     }
 
     function peg$endExpectation() {
-      return {type: "end"};
+      return { type: "end" };
     }
 
     function peg$otherExpectation(description) {
-      return {type: "other", description: description};
+      return { type: "other", description: description };
     }
 
     function peg$computePosDetails(pos) {
@@ -278,7 +261,7 @@ const parser = (function () {
 
         details = peg$posDetailsCache[p];
         details = {
-          line: details.line,
+          line:   details.line,
           column: details.column
         };
 
@@ -300,26 +283,24 @@ const parser = (function () {
 
     function peg$computeLocation(startPos, endPos) {
       var startPosDetails = peg$computePosDetails(startPos),
-          endPosDetails = peg$computePosDetails(endPos);
+          endPosDetails   = peg$computePosDetails(endPos);
 
       return {
         start: {
           offset: startPos,
-          line: startPosDetails.line,
+          line:   startPosDetails.line,
           column: startPosDetails.column
         },
         end: {
           offset: endPos,
-          line: endPosDetails.line,
+          line:   endPosDetails.line,
           column: endPosDetails.column
         }
       };
     }
 
     function peg$fail(expected) {
-      if (peg$currPos < peg$maxFailPos) {
-        return;
-      }
+      if (peg$currPos < peg$maxFailPos) { return; }
 
       if (peg$currPos > peg$maxFailPos) {
         peg$maxFailPos = peg$currPos;
@@ -357,9 +338,7 @@ const parser = (function () {
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) {
-              peg$fail(peg$c1);
-            }
+            if (peg$silentFails === 0) { peg$fail(peg$c1); }
           }
           if (s5 === peg$FAILED) {
             if (input.substr(peg$currPos, 2) === peg$c2) {
@@ -367,9 +346,7 @@ const parser = (function () {
               peg$currPos += 2;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c3);
-              }
+              if (peg$silentFails === 0) { peg$fail(peg$c3); }
             }
           }
           if (s5 !== peg$FAILED) {
@@ -405,9 +382,7 @@ const parser = (function () {
               peg$currPos += 2;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c1);
-              }
+              if (peg$silentFails === 0) { peg$fail(peg$c1); }
             }
             if (s5 === peg$FAILED) {
               if (input.substr(peg$currPos, 2) === peg$c2) {
@@ -415,9 +390,7 @@ const parser = (function () {
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c3);
-                }
+                if (peg$silentFails === 0) { peg$fail(peg$c3); }
               }
             }
             if (s5 !== peg$FAILED) {
@@ -475,9 +448,7 @@ const parser = (function () {
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) {
-              peg$fail(peg$c6);
-            }
+            if (peg$silentFails === 0) { peg$fail(peg$c6); }
           }
           if (s5 === peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 60) {
@@ -485,9 +456,7 @@ const parser = (function () {
               peg$currPos++;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c8);
-              }
+              if (peg$silentFails === 0) { peg$fail(peg$c8); }
             }
             if (s5 === peg$FAILED) {
               if (input.substr(peg$currPos, 2) === peg$c9) {
@@ -495,9 +464,7 @@ const parser = (function () {
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c10);
-                }
+                if (peg$silentFails === 0) { peg$fail(peg$c10); }
               }
               if (s5 === peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 62) {
@@ -505,9 +472,7 @@ const parser = (function () {
                   peg$currPos++;
                 } else {
                   s5 = peg$FAILED;
-                  if (peg$silentFails === 0) {
-                    peg$fail(peg$c12);
-                  }
+                  if (peg$silentFails === 0) { peg$fail(peg$c12); }
                 }
                 if (s5 === peg$FAILED) {
                   if (input.charCodeAt(peg$currPos) === 61) {
@@ -515,9 +480,7 @@ const parser = (function () {
                     peg$currPos++;
                   } else {
                     s5 = peg$FAILED;
-                    if (peg$silentFails === 0) {
-                      peg$fail(peg$c14);
-                    }
+                    if (peg$silentFails === 0) { peg$fail(peg$c14); }
                   }
                   if (s5 === peg$FAILED) {
                     if (input.charCodeAt(peg$currPos) === 42) {
@@ -525,9 +488,7 @@ const parser = (function () {
                       peg$currPos++;
                     } else {
                       s5 = peg$FAILED;
-                      if (peg$silentFails === 0) {
-                        peg$fail(peg$c16);
-                      }
+                      if (peg$silentFails === 0) { peg$fail(peg$c16); }
                     }
                     if (s5 === peg$FAILED) {
                       if (input.charCodeAt(peg$currPos) === 33) {
@@ -535,9 +496,7 @@ const parser = (function () {
                         peg$currPos++;
                       } else {
                         s5 = peg$FAILED;
-                        if (peg$silentFails === 0) {
-                          peg$fail(peg$c18);
-                        }
+                        if (peg$silentFails === 0) { peg$fail(peg$c18); }
                       }
                       if (s5 === peg$FAILED) {
                         if (input.charCodeAt(peg$currPos) === 125) {
@@ -545,9 +504,7 @@ const parser = (function () {
                           peg$currPos++;
                         } else {
                           s5 = peg$FAILED;
-                          if (peg$silentFails === 0) {
-                            peg$fail(peg$c20);
-                          }
+                          if (peg$silentFails === 0) { peg$fail(peg$c20); }
                         }
                         if (s5 === peg$FAILED) {
                           if (input.charCodeAt(peg$currPos) === 123) {
@@ -555,9 +512,7 @@ const parser = (function () {
                             peg$currPos++;
                           } else {
                             s5 = peg$FAILED;
-                            if (peg$silentFails === 0) {
-                              peg$fail(peg$c22);
-                            }
+                            if (peg$silentFails === 0) { peg$fail(peg$c22); }
                           }
                         }
                       }
@@ -601,9 +556,7 @@ const parser = (function () {
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c6);
-                }
+                if (peg$silentFails === 0) { peg$fail(peg$c6); }
               }
               if (s5 === peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 60) {
@@ -611,9 +564,7 @@ const parser = (function () {
                   peg$currPos++;
                 } else {
                   s5 = peg$FAILED;
-                  if (peg$silentFails === 0) {
-                    peg$fail(peg$c8);
-                  }
+                  if (peg$silentFails === 0) { peg$fail(peg$c8); }
                 }
                 if (s5 === peg$FAILED) {
                   if (input.substr(peg$currPos, 2) === peg$c9) {
@@ -621,9 +572,7 @@ const parser = (function () {
                     peg$currPos += 2;
                   } else {
                     s5 = peg$FAILED;
-                    if (peg$silentFails === 0) {
-                      peg$fail(peg$c10);
-                    }
+                    if (peg$silentFails === 0) { peg$fail(peg$c10); }
                   }
                   if (s5 === peg$FAILED) {
                     if (input.charCodeAt(peg$currPos) === 62) {
@@ -631,9 +580,7 @@ const parser = (function () {
                       peg$currPos++;
                     } else {
                       s5 = peg$FAILED;
-                      if (peg$silentFails === 0) {
-                        peg$fail(peg$c12);
-                      }
+                      if (peg$silentFails === 0) { peg$fail(peg$c12); }
                     }
                     if (s5 === peg$FAILED) {
                       if (input.charCodeAt(peg$currPos) === 61) {
@@ -641,9 +588,7 @@ const parser = (function () {
                         peg$currPos++;
                       } else {
                         s5 = peg$FAILED;
-                        if (peg$silentFails === 0) {
-                          peg$fail(peg$c14);
-                        }
+                        if (peg$silentFails === 0) { peg$fail(peg$c14); }
                       }
                       if (s5 === peg$FAILED) {
                         if (input.charCodeAt(peg$currPos) === 42) {
@@ -651,9 +596,7 @@ const parser = (function () {
                           peg$currPos++;
                         } else {
                           s5 = peg$FAILED;
-                          if (peg$silentFails === 0) {
-                            peg$fail(peg$c16);
-                          }
+                          if (peg$silentFails === 0) { peg$fail(peg$c16); }
                         }
                         if (s5 === peg$FAILED) {
                           if (input.charCodeAt(peg$currPos) === 33) {
@@ -661,9 +604,7 @@ const parser = (function () {
                             peg$currPos++;
                           } else {
                             s5 = peg$FAILED;
-                            if (peg$silentFails === 0) {
-                              peg$fail(peg$c18);
-                            }
+                            if (peg$silentFails === 0) { peg$fail(peg$c18); }
                           }
                           if (s5 === peg$FAILED) {
                             if (input.charCodeAt(peg$currPos) === 125) {
@@ -671,9 +612,7 @@ const parser = (function () {
                               peg$currPos++;
                             } else {
                               s5 = peg$FAILED;
-                              if (peg$silentFails === 0) {
-                                peg$fail(peg$c20);
-                              }
+                              if (peg$silentFails === 0) { peg$fail(peg$c20); }
                             }
                             if (s5 === peg$FAILED) {
                               if (input.charCodeAt(peg$currPos) === 123) {
@@ -681,9 +620,7 @@ const parser = (function () {
                                 peg$currPos++;
                               } else {
                                 s5 = peg$FAILED;
-                                if (peg$silentFails === 0) {
-                                  peg$fail(peg$c22);
-                                }
+                                if (peg$silentFails === 0) { peg$fail(peg$c22); }
                               }
                             }
                           }
@@ -795,9 +732,7 @@ const parser = (function () {
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c26);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c26); }
       }
 
       return s0;
@@ -812,9 +747,7 @@ const parser = (function () {
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c28);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c28); }
       }
       while (s1 !== peg$FAILED) {
         s0.push(s1);
@@ -823,9 +756,7 @@ const parser = (function () {
           peg$currPos++;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) {
-            peg$fail(peg$c28);
-          }
+          if (peg$silentFails === 0) { peg$fail(peg$c28); }
         }
       }
 
@@ -840,9 +771,7 @@ const parser = (function () {
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c30);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c30); }
       }
 
       return s0;
@@ -869,10 +798,9 @@ const parser = (function () {
 
   return {
     SyntaxError: peg$SyntaxError,
-    parse: peg$parse
+    parse:       peg$parse
   };
 })();
-
 
 class Column {
   constructor(name) {
@@ -914,7 +842,7 @@ class Filter {
      */
     this.__LOGIC_SYNTAX = {
       //Intersection
-      '&&': (lRows = [], rRows = []) => lRows.filter((n) => rRows.indexOf(n) !== -1),
+      '&&': (lRows = [], rRows = []) =>  lRows.filter((n) => rRows.indexOf(n) !== -1),
       //Concatenation with deduplicate;
       '||': (lRows = [], rRows = []) => [...new Set(lRows.concat(rRows)).values()]
     };
@@ -962,26 +890,28 @@ class Filter {
 
     this.lastError = '';
 
-    this.expression = '';
+    this.expression = "";
     this.setExpression(lastFilterQuery)
   }
 
 
   setExpression(expression) {
     this.expression = expression;
-    if (expression.trim().length !== 0) {
-      this.__parseExpression(expression.trim());
-    }
+    this.__parseExpression(expression.trim());
   }
 
 
   __parseExpression(expression) {
     this.lastError = '';
     var lastExpression = this.__parsedExpression;
-    try {
-      this.__parsedExpression = parser.parse(expression, {'startRule': 'Expression'});
-    } catch (e) {
-      this.lastError = e.message;
+    if (expression.length > 0) {
+      try {
+        this.__parsedExpression = parser.parse(expression, {'startRule': 'Expression'});
+      } catch (e) {
+        this.lastError = e.message;
+      }
+    } else {
+      this.__parsedExpression = undefined;
     }
 
     if (JSON.stringify(this.__parsedExpression) !== JSON.stringify(lastExpression)) {
@@ -1046,8 +976,6 @@ class Filter {
       }
     });
   };
-
-
 }
 
 class Row {
@@ -1101,6 +1029,7 @@ class Row {
   }
 }
 
+
 class Table {
   constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap) {
     /**
@@ -1122,7 +1051,7 @@ class Table {
       this.rows[rowClass.key] = rowClass;
     });
 
-    this.sorting = {
+    this.ordering = {
       'column': null,
       'order': true
     };
@@ -1158,13 +1087,13 @@ class Table {
     return this;
   }
 
-  exportSortedRows(rows) {
-    if (this.sorting.column) {
+  exportOrderedRows(rows) {
+    if (this.ordering.column) {
       return rows.sort((rowA, rowB) => {
-        let valueA = rowA.getValueByColumnName(this.sorting.column);
-        let valueB = rowB.getValueByColumnName(this.sorting.column);
+        let valueA = rowA.getValueByColumnName(this.ordering.column);
+        let valueB = rowB.getValueByColumnName(this.ordering.column);
 
-        if (this.sorting.order) {
+        if (this.ordering.order) {
           if (valueA < valueB) {
             return -1;
           } else if (valueA > valueB) {
@@ -1198,12 +1127,12 @@ class Table {
     let rowsArray = Object.keys(this.rows)
         .map((rowKey) => this.rows[rowKey]);
 
-    return this.exportSortedRows(this.exportFilteredRows(rowsArray));
+    return this.exportOrderedRows(this.exportFilteredRows(rowsArray));
   }
 
-  setSorting(columnName, order) {
-    this.sorting.column = columnName;
-    this.sorting.order = order;
+  setOrdering(columnName, order) {
+    this.ordering.column = columnName;
+    this.ordering.order = order;
     return this;
   }
 
@@ -1213,7 +1142,7 @@ class Table {
   }
 
   static empty() {
-    return new Table([], [], (expression)=> expression, '');
+    return new Table([], [], (expression)=> expression, "");
   }
 
   getFilterExpression() {
@@ -1227,6 +1156,84 @@ class Table {
 }
 
 
+const DEFAULT_LEFT = '8px';
+
+class ColumnResizerView extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.defaultStyle = {
+      width: '16px',
+      height: '11px',
+      cursor: 'col-resize',
+      border: '0px',
+      paddingLeft: '0px',
+      paddingRight: '0px',
+      display: 'flex',
+      position: 'relative',
+      left: DEFAULT_LEFT,
+      zIndex: '1'
+    };
+
+    this.imgStyle = {
+      position: 'relative',
+      top: '-9px',
+      left: '-4px',
+    }
+
+
+  }
+
+  componentWillMount() {
+    this.setState({'drag': false});
+  }
+
+  updateState(drag, xPosition) {
+    this.setState({drag, xPosition})
+  }
+
+  setXPosition(xPosition) {
+    this.setState({xPosition})
+  }
+
+  generateStyles() {
+    if (this.state.drag) {
+      this.defaultStyle['position'] = 'fixed';
+      this.defaultStyle['left'] = this.state.xPosition;
+    } else {
+      this.defaultStyle['position'] = 'relative';
+      this.defaultStyle['left'] = DEFAULT_LEFT;
+    }
+
+    return Object.assign({}, this.defaultStyle);
+  }
+
+  render() {
+
+    let {handleWidthChange} = this.props;
+
+    return (<th
+        style={this.generateStyles()}
+        onDragStart={(e) => {
+          this.updateState(true, e.clientX - 14);
+        }}
+        onDragEnd={(e) => {
+          this.updateState(false, e.clientX - 14);
+        }}
+        onDrag={(e) => {
+          if (this.state.drag && e.clientX !== 0) {
+            this.setXPosition(e.clientX);
+            handleWidthChange(e.clientX, this.state.xPosition);
+          }
+        }}>
+      <img style={this.imgStyle} width="25" height="12" title="" alt=""
+           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg=="/>
+    </th>);
+  };
+}
+
+
+
 class ColumnsVisibility extends React.Component {
   constructor(props) {
     super(props);
@@ -1237,14 +1244,14 @@ class ColumnsVisibility extends React.Component {
     let {onChange, columns} = this.props;
 
     return (
-        <div className='form-group col-sm-12 col-md-12 col-lg-12 col-xs-12'>
-          <label className='control-label'>Hide columns</label>
+        <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+          <label className="control-label">Hide columns</label>
           <br/>
           {columns.map(column => {
             return (
-                <label className='checkbox-inline' key={column.name}>
-                  <input type='checkbox'
-                         value=''
+                <label className="checkbox-inline" key={column.name}>
+                  <input type="checkbox"
+                         value=""
                          onChange={(evt) => {
                            onChange(column.name, !evt.target.checked)
                          }}/>
@@ -1257,33 +1264,57 @@ class ColumnsVisibility extends React.Component {
   }
 }
 
-class FilterView extends React.Component {
+
+class ColumnView extends React.Component {
   constructor(props) {
     super(props);
   }
 
+  orderingIconClass(columnName, orderingColumnName) {
+    if (orderingColumnName !== columnName) {
+      return "glyphicon glyphicon-sort";
+    } else if (orderingColumnName === columnName && this.props.order) {
+      return "glyphicon glyphicon-sort-by-attributes";
+    } else if (orderingColumnName === columnName && !this.props.order) {
+      return "glyphicon glyphicon-sort-by-attributes-alt";
+    } else {
+      return "glyphicon glyphicon-sort";
+    }
+  }
+
   render() {
 
-    let {table, filterHandler, columnsVisibilityHandler} = this.props;
 
-    return (
-        <div className='panel panel-default'>
-          <div className='panel-heading'>
-            <h3 className='panel-title'>Table filtering</h3>
-          </div>
+    let {
+        column,
+        orderedByColumn,
+        columnOrderingHandler,
+        notLast,
+        width
+    } = this.props;
 
-          <div className='panel-body'>
+    const style = {};
 
-            <QueryInput onChange={filterHandler}
-                        query={table.getFilterExpression()}
-                        error={table.getFilterError()}/>
+    if (notLast) {
+      style['borderRight'] = '0px';
+    } else {
+      style['borderRight'] = undefined;
+    }
 
-            <ColumnsVisibility columns={table.columns}
-                               onChange={columnsVisibilityHandler}/>
-          </div>
-        </div>
-    )
-  }
+    if (width) {
+      style['width'] = width + 'px'
+    }
+
+    return (<th key={column.name}
+                style={style}
+                className={column.inFilterExpression ? "active" : "" }>
+              <span
+                  className={this.orderingIconClass(column.name, orderedByColumn)}
+                  onClick={() => columnOrderingHandler(column.name)}/>
+      &nbsp;{column.name}
+
+    </th>);
+  };
 }
 
 
@@ -1292,72 +1323,172 @@ class Header extends React.Component {
     super(props);
   }
 
-  setSorting(columnName, order) {
+  setOrdering(columnName, order) {
     this.setState({
       columnName: columnName,
       order: order
     });
   }
 
-  componentWillMount() {
-    this.setSorting(null, null);
-  }
-
-  toggleSorting(columnName) {
+  toggleOrdering(columnName) {
     let order = true;
     if (this.state.columnName !== columnName) {
-      this.setSorting(columnName, true)
+      this.setOrdering(columnName, true)
     } else {
       order = !this.state.order;
-      this.setSorting(columnName, order)
+      this.setOrdering(columnName, order)
     }
     return order;
   }
 
-  sortingIconClass(columnName) {
-    if (this.state.columnName !== columnName) {
-      return 'glyphicon glyphicon-sort';
-    } else if (this.state.columnName === columnName && this.state.order) {
-      return 'glyphicon glyphicon-sort-by-attributes';
-    } else if (this.state.columnName === columnName && !this.state.order) {
-      return 'glyphicon glyphicon-sort-by-attributes-alt';
-    } else {
-      return 'glyphicon glyphicon-sort';
-    }
+  handleWidthChange(currentX, initialX, leftColumn, rightColumn) {
+    const diff = initialX - currentX;
+
+    const newState = Object.assign({}, this.state.columnsWidth);
+
+    const leftKey = `columnsWidth.${leftColumn}`;
+    const rightKey = `columnsWidth.${rightColumn}`;
+
+    newState[rightColumn] = newState[rightColumn] + diff > 0 ? newState[rightColumn] + diff : 0;
+    newState[leftColumn] = newState[leftColumn] - diff > 0 ? newState[leftColumn] - diff : 0;
+
+    this.setState({columnsWidth: newState})
   }
+
+  updateWidth() {
+    this.setState({
+      elWidth: ReactDOM.findDOMNode(this).getBoundingClientRect().width
+    })
+  }
+
+  recalculateWidth() {
+    const columns = this.props.columns;
+    const currentSizes = this.state.columnsWidth;
+    const width = ReactDOM.findDOMNode(this).getBoundingClientRect().width;
+
+    const state = {};
+    let initialState = 0;
+
+    const multipliers = {};
+
+    columns.forEach(column => {
+      if (initialState) {
+        multipliers[column.name] = (currentSizes[column.name] / initialState );
+      } else {
+        initialState = currentSizes[column.name];
+        multipliers[column.name] = 1
+      }
+    });
+
+    const multipliersSum =
+        Object.keys(multipliers).reduce((a, b) => a + multipliers[b], 0);
+
+    const columnWidth = Math.floor(width / multipliersSum);
+
+    columns.forEach(column => {
+      state[column.name] = multipliers[column.name] * columnWidth;
+    });
+
+    this.setState({columnsWidth: state})
+  }
+
+
+  populateColumns(columns) {
+    const width = ReactDOM.findDOMNode(this).getBoundingClientRect().width;
+    const columnWidth = Math.floor(width / columns.length);
+
+    const state = {};
+
+    columns.forEach((column) => {
+      state[column.name] = columnWidth;
+    });
+
+    this.setState({columnsWidth: state});
+  }
+
+  initState() {
+    this.setState(
+        {
+          columnName: null,
+          order: null,
+          columnsWidth: {}
+        }
+    )
+  }
+
+  componentDidMount() {
+    this.updateWidth();
+    this.populateColumns(this.props.columns);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", () => this.recalculateWidth());
+  }
+
+  componentWillMount() {
+    this.initState();
+    window.addEventListener("resize", () => this.recalculateWidth());
+  }
+
 
   render() {
 
-    let {columns, columnSortingHandler}= this.props;
-
-    let style = {
-      resize: 'horizontal',
-      overflow: 'auto'
-    };
+    let {columns, columnOrderingHandler, orderingColumn}= this.props;
+    let {columnsWidth} = this.state;
 
     return (
         <thead>
         <tr>
-          {columns.map(column => {
+          {columns.map((column, idx) => {
             if (column.visibility) {
-              return (
-                  <th style={style}
-                      className={column.inFilterExpression ? 'col-md-1 active' : 'col-md-1' }
-                      key={column.name}>
-                    <div>
-              <span className={this.sortingIconClass(column.name)}
-                    onClick={() => {
-                      columnSortingHandler(column.name, this.toggleSorting(column.name));
-                    }}
-              /> &nbsp;
-                      {column.name}
-                    </div>
+              const notLast = idx < (columns.length - 1);
 
-                  </th>);
+              let result = [
+                <ColumnView
+                    column={column}
+                    orderedByColumn={orderingColumn}
+                    notLast={notLast}
+                    width={columnsWidth[column.name]}
+                    order={this.state.order}
+                    columnOrderingHandler={(columnName) => columnOrderingHandler(columnName, this.toggleOrdering(columnName))}/>
+              ];
+
+              if (notLast) {
+                result.push(<ColumnResizerView
+                    handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, columns[idx + 1].name)}
+                />)
+              }
+
+              return (result);
             }
           })}
         </tr>
         </thead>
+    )
+  };
+}
+
+
+
+
+class RowView extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+
+    /**
+     * @type {Row}
+     */
+    let row = this.props.row;
+
+
+    return (
+        <tr>
+          {row.columns.map(column => column.visibility ?
+              <td colSpan="2">{row.getValue(column)}</td> : null)}
+        </tr>
     )
   };
 }
@@ -1381,11 +1512,10 @@ class QueryInput extends React.Component {
   render() {
 
     let {onChange, query, error} = this.props;
-    let hasError = error !== '';
+    let hasError = !!error;
 
     return (
-        <div
-            className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
+        <div className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
           <label htmlFor='tableViewFilterQuery'>Filter Query</label>
           <input
               id='tableViewFilterQuery'
@@ -1399,27 +1529,43 @@ class QueryInput extends React.Component {
 }
 
 
-class RowView extends React.Component {
+
+class FilterView extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
 
-    /**
-     * @type {Row}
-     */
-    let row = this.props.row;
+    let {table, filterHandler, columnsVisibilityHandler, resetOrdering} = this.props;
 
     return (
-        <tr>
-          {row.columns.map(column => column.visibility ?
-              <td>{row.getValue(column)}</td> : null)}
-        </tr>
-    )
-  };
-}
+        <div className="panel panel-default">
+          <div className="panel-heading">
+            <h3 className="panel-title">Table filtering</h3>
+          </div>
 
+          <div className="panel-body">
+
+            <QueryInput onChange={filterHandler}
+                        query={table.getFilterExpression()}
+                        error={table.getFilterError()}/>
+
+            <ColumnsVisibility columns={table.columns}
+                               onChange={columnsVisibilityHandler}/>
+
+            <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+              <label className="control-label">Ordering</label>
+              <br/>
+              <button type="button" className="btn btn-danger"
+                      onClick={resetOrdering}> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+    )
+  }
+}
 
 class TableView extends React.Component {
   constructor(props) {
@@ -1434,8 +1580,12 @@ class TableView extends React.Component {
     this.setState({td: this.state.td.setColumnVisibility(column, value)});
   }
 
-  columnSortingHandler(columnName, order) {
-    this.setState({td: this.state.td.setSorting(columnName, order)});
+  columnOrderingHandler(columnName, order) {
+    this.setState({td: this.state.td.setOrdering(columnName, order)});
+  }
+
+  resetOrdering() {
+    this.setState({td: this.state.td.setOrdering(null, null)});
   }
 
   bootstrapTable(data, filterQueryExporter, filterQuery) {
@@ -1457,7 +1607,7 @@ class TableView extends React.Component {
   }
 
   componentDidMount() {
-    let {socket, eventName, filterQueryExporter = (expression)=> expression, filterQuery = ''} = this.props;
+    let {socket, eventName, filterQueryExporter = (expression)=> expression, filterQuery = ""} = this.props;
     socket.on(eventName, (data) => {
       if (data && data.columns && data.rows) {
         this.bootstrapTable(data, filterQueryExporter, filterQuery);
@@ -1472,27 +1622,33 @@ class TableView extends React.Component {
 
     let {td: table} = this.state;
 
-    return (
-        <div className='container-fluid'>
+    if (table.columns.length > 0) {
+      return (
+          <div className="container-fluid">
 
-          <FilterView
-              table={table}
-              filterHandler={(expr) => this.filterHandler(expr)}
-              columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}/>
+            <FilterView
+                table={table}
+                filterHandler={(expr) => this.filterHandler(expr)}
+                columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
+                resetOrdering={() => this.resetOrdering()}
+            />
+            <table className="table table-responsive table-bordered">
+              <Header
+                  columns={table.columns}
+                  columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
+                  orderingColumn={table.ordering.column}
+              />
 
-          <table className='table table-bordered'>
-            <Header
-                columns={table.columns}
-                columnSortingHandler={(columnName, order) => this.columnSortingHandler(columnName, order)}/>
-
-            <tbody>
-            {table.exportRows().map(row => <RowView
-                key={row.key}
-                row={row}/>)}
-            </tbody>
-          </table>
-        </div>
-    )
+              <tbody>
+              {table.exportRows().map(row => <RowView
+                  key={row.key}
+                  row={row}/>)}
+              </tbody>
+            </table>
+          </div>
+      )
+    }
+    return (null);
   };
 }
 

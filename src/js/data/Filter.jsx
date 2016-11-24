@@ -1,4 +1,4 @@
-import parser from '../parser.jsx';
+import {parser} from '../parser.jsx';
 
 class Filter {
 
@@ -84,10 +84,14 @@ class Filter {
   __parseExpression(expression) {
     this.lastError = '';
     var lastExpression = this.__parsedExpression;
-    try {
-      this.__parsedExpression = parser.parse(expression, {'startRule': 'Expression'});
-    } catch (e) {
-      this.lastError = e.message;
+    if (expression.length > 0) {
+      try {
+        this.__parsedExpression = parser.parse(expression, {'startRule': 'Expression'});
+      } catch (e) {
+        this.lastError = e.message;
+      }
+    } else {
+      this.__parsedExpression = undefined;
     }
 
     if (JSON.stringify(this.__parsedExpression) !== JSON.stringify(lastExpression)) {
@@ -152,10 +156,6 @@ class Filter {
       }
     });
   };
-
-
-
-
 }
 
 export default Filter;

@@ -23,7 +23,7 @@ class Table {
       this.rows[rowClass.key] = rowClass;
     });
 
-    this.sorting = {
+    this.ordering = {
       'column': null,
       'order': true
     };
@@ -59,13 +59,13 @@ class Table {
     return this;
   }
 
-  exportSortedRows(rows) {
-    if (this.sorting.column) {
+  exportOrderedRows(rows) {
+    if (this.ordering.column) {
       return rows.sort((rowA, rowB) => {
-        let valueA = rowA.getValueByColumnName(this.sorting.column);
-        let valueB = rowB.getValueByColumnName(this.sorting.column);
+        let valueA = rowA.getValueByColumnName(this.ordering.column);
+        let valueB = rowB.getValueByColumnName(this.ordering.column);
 
-        if (this.sorting.order) {
+        if (this.ordering.order) {
           if (valueA < valueB) {
             return -1;
           } else if (valueA > valueB) {
@@ -99,12 +99,12 @@ class Table {
     let rowsArray = Object.keys(this.rows)
         .map((rowKey) => this.rows[rowKey]);
 
-    return this.exportSortedRows(this.exportFilteredRows(rowsArray));
+    return this.exportOrderedRows(this.exportFilteredRows(rowsArray));
   }
 
-  setSorting(columnName, order) {
-    this.sorting.column = columnName;
-    this.sorting.order = order;
+  setOrdering(columnName, order) {
+    this.ordering.column = columnName;
+    this.ordering.order = order;
     return this;
   }
 

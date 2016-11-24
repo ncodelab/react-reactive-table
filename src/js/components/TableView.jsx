@@ -18,8 +18,12 @@ class TableView extends React.Component {
     this.setState({td: this.state.td.setColumnVisibility(column, value)});
   }
 
-  columnSortingHandler(columnName, order) {
-    this.setState({td: this.state.td.setSorting(columnName, order)});
+  columnOrderingHandler(columnName, order) {
+    this.setState({td: this.state.td.setOrdering(columnName, order)});
+  }
+
+  resetOrdering() {
+    this.setState({td: this.state.td.setOrdering(null, null)});
   }
 
   bootstrapTable(data, filterQueryExporter, filterQuery) {
@@ -56,27 +60,33 @@ class TableView extends React.Component {
 
     let {td: table} = this.state;
 
-    return (
-        <div className="container-fluid">
+    if (table.columns.length > 0) {
+      return (
+          <div className="container-fluid">
 
-          <FilterView
-              table={table}
-              filterHandler={(expr) => this.filterHandler(expr)}
-              columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}/>
+            <FilterView
+                table={table}
+                filterHandler={(expr) => this.filterHandler(expr)}
+                columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
+                resetOrdering={() => this.resetOrdering()}
+            />
+            <table className="table table-responsive table-bordered">
+              <Header
+                  columns={table.columns}
+                  columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
+                  orderingColumn={table.ordering.column}
+              />
 
-          <table className="table table-bordered">
-            <Header
-                columns={table.columns}
-                columnSortingHandler={(columnName, order) => this.columnSortingHandler(columnName, order)}/>
-
-            <tbody>
-            {table.exportRows().map(row => <RowView
-                key={row.key}
-                row={row}/>)}
-            </tbody>
-          </table>
-        </div>
-    )
+              <tbody>
+              {table.exportRows().map(row => <RowView
+                  key={row.key}
+                  row={row}/>)}
+              </tbody>
+            </table>
+          </div>
+      )
+    }
+    return (null);
   };
 }
 

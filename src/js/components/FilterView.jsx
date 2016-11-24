@@ -11,7 +11,7 @@ class FilterView extends React.Component {
 
   render() {
 
-    let {table, filterHandler, columnsVisibilityHandler} = this.props;
+    let {table, filterHandler, columnsVisibilityHandler, resetOrdering} = this.props;
 
     return (
         <div className="panel panel-default">
@@ -21,12 +21,20 @@ class FilterView extends React.Component {
 
           <div className="panel-body">
 
-              <QueryInput onChange={filterHandler}
-                          query={table.getFilterExpression()}
-                          error={table.getFilterError()}/>
+            <QueryInput onChange={filterHandler}
+                        query={table.getFilterExpression()}
+                        error={table.getFilterError()}/>
 
-              <ColumnsVisibility columns={table.columns}
-                                 onChange={columnsVisibilityHandler}/>
+            <ColumnsVisibility columns={table.columns}
+                               onChange={columnsVisibilityHandler}/>
+
+            <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+              <label className="control-label">Ordering</label>
+              <br/>
+              <button type="button" className="btn btn-danger"
+                      onClick={resetOrdering}> Reset
+              </button>
+            </div>
           </div>
         </div>
     )

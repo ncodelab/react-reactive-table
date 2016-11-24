@@ -13,10 +13,11 @@ class RowView extends React.Component {
      */
     let row = this.props.row;
 
+
     return (
         <tr>
           {row.columns.map(column => column.visibility ?
-              <td>{row.getValue(column)}</td> : null)}
+              <td colSpan="2">{row.getValue(column)}</td> : null)}
         </tr>
     )
   };
