@@ -73,6 +73,7 @@ class TableView extends React.Component {
             <table className="table table-responsive table-bordered">
               <Header
                   columns={table.columns}
+                  visibleColumns={table.columns.filter(col => col.visibility)}
                   columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
                   orderingColumn={table.ordering.column}
               />

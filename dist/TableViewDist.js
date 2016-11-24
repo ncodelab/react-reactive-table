@@ -1,21 +1,23 @@
-import React from 'react'
+import React from 'react';
 import ReactDOM from 'react-dom';
 
-const parser = (function() {
+const parser = function () {
   "use strict";
 
   function peg$subclass(child, parent) {
-    function ctor() { this.constructor = child; }
+    function ctor() {
+      this.constructor = child;
+    }
     ctor.prototype = parent.prototype;
     child.prototype = new ctor();
   }
 
   function peg$SyntaxError(message, expected, found, location) {
-    this.message  = message;
+    this.message = message;
     this.expected = expected;
-    this.found    = found;
+    this.found = found;
     this.location = location;
-    this.name     = "SyntaxError";
+    this.name = "SyntaxError";
 
     if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, peg$SyntaxError);
@@ -24,34 +26,32 @@ const parser = (function() {
 
   peg$subclass(peg$SyntaxError, Error);
 
-  peg$SyntaxError.buildMessage = function(expected, found) {
+  peg$SyntaxError.buildMessage = function (expected, found) {
     var DESCRIBE_EXPECTATION_FNS = {
-      literal: function(expectation) {
+      literal: function (expectation) {
         return "\"" + literalEscape(expectation.text) + "\"";
       },
 
-      "class": function(expectation) {
+      "class": function (expectation) {
         var escapedParts = "",
             i;
 
         for (i = 0; i < expectation.parts.length; i++) {
-          escapedParts += expectation.parts[i] instanceof Array
-              ? classEscape(expectation.parts[i][0]) + "-" + classEscape(expectation.parts[i][1])
-              : classEscape(expectation.parts[i]);
+          escapedParts += expectation.parts[i] instanceof Array ? classEscape(expectation.parts[i][0]) + "-" + classEscape(expectation.parts[i][1]) : classEscape(expectation.parts[i]);
         }
 
         return "[" + (expectation.inverted ? "^" : "") + escapedParts + "]";
       },
 
-      any: function(expectation) {
+      any: function (expectation) {
         return "any character";
       },
 
-      end: function(expectation) {
+      end: function (expectation) {
         return "end of input";
       },
 
-      other: function(expectation) {
+      other: function (expectation) {
         return expectation.description;
       }
     };
@@ -61,29 +61,19 @@ const parser = (function() {
     }
 
     function literalEscape(s) {
-      return s
-          .replace(/\\/g, '\\\\')
-          .replace(/"/g,  '\\"')
-          .replace(/\0/g, '\\0')
-          .replace(/\t/g, '\\t')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
+      return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\0/g, '\\0').replace(/\t/g, '\\t').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/[\x00-\x0F]/g, function (ch) {
+        return '\\x0' + hex(ch);
+      }).replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
+        return '\\x' + hex(ch);
+      });
     }
 
     function classEscape(s) {
-      return s
-          .replace(/\\/g, '\\\\')
-          .replace(/\]/g, '\\]')
-          .replace(/\^/g, '\\^')
-          .replace(/-/g,  '\\-')
-          .replace(/\0/g, '\\0')
-          .replace(/\t/g, '\\t')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
+      return s.replace(/\\/g, '\\\\').replace(/\]/g, '\\]').replace(/\^/g, '\\^').replace(/-/g, '\\-').replace(/\0/g, '\\0').replace(/\t/g, '\\t').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/[\x00-\x0F]/g, function (ch) {
+        return '\\x0' + hex(ch);
+      }).replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
+        return '\\x' + hex(ch);
+      });
     }
 
     function describeExpectation(expectation) {
@@ -92,7 +82,8 @@ const parser = (function() {
 
     function describeExpected(expected) {
       var descriptions = new Array(expected.length),
-          i, j;
+          i,
+          j;
 
       for (i = 0; i < expected.length; i++) {
         descriptions[i] = describeExpectation(expected[i]);
@@ -118,9 +109,7 @@ const parser = (function() {
           return descriptions[0] + " or " + descriptions[1];
 
         default:
-          return descriptions.slice(0, -1).join(", ")
-              + ", or "
-              + descriptions[descriptions.length - 1];
+          return descriptions.slice(0, -1).join(", ") + ", or " + descriptions[descriptions.length - 1];
       }
     }
 
@@ -135,21 +124,19 @@ const parser = (function() {
     options = options !== void 0 ? options : {};
 
     var peg$FAILED = {},
-
         peg$startRuleFunctions = { Expression: peg$parseExpression },
-        peg$startRuleFunction  = peg$parseExpression,
-
+        peg$startRuleFunction = peg$parseExpression,
         peg$c0 = "&&",
         peg$c1 = peg$literalExpectation("&&", false),
         peg$c2 = "||",
         peg$c3 = peg$literalExpectation("||", false),
-        peg$c4 = function(head, tail) {
-          return tail.reduce(function(result, element) {
+        peg$c4 = function (head, tail) {
+          return tail.reduce(function (result, element) {
             return {
               'l': result,
               'r': element[3],
               'op': element[1]
-            }
+            };
           }, head);
         },
         peg$c5 = "<=",
@@ -170,30 +157,30 @@ const parser = (function() {
         peg$c20 = peg$literalExpectation("}", false),
         peg$c21 = "{",
         peg$c22 = peg$literalExpectation("{", false),
-        peg$c23 = function(head, tail) {
-          return tail.reduce(function(result, element) {
+        peg$c23 = function (head, tail) {
+          return tail.reduce(function (result, element) {
             return {
               'col': result[1],
               'act': element[1],
               'exp': element[3]
-            }
+            };
           }, head);
         },
-        peg$c24 = function(chars) {return chars.join("");},
+        peg$c24 = function (chars) {
+          return chars.join("");
+        },
         peg$c25 = /^[a-zA-Z0-9]/,
         peg$c26 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"]], false, false),
         peg$c27 = /^[ \t\n\r]/,
         peg$c28 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
         peg$c29 = /^["]/,
         peg$c30 = peg$classExpectation(["\""], false, false),
-
-        peg$currPos          = 0,
-        peg$savedPos         = 0,
-        peg$posDetailsCache  = [{ line: 1, column: 1 }],
-        peg$maxFailPos       = 0,
-        peg$maxFailExpected  = [],
-        peg$silentFails      = 0,
-
+        peg$currPos = 0,
+        peg$savedPos = 0,
+        peg$posDetailsCache = [{ line: 1, column: 1 }],
+        peg$maxFailPos = 0,
+        peg$maxFailExpected = [],
+        peg$silentFails = 0,
         peg$result;
 
     if ("startRule" in options) {
@@ -213,17 +200,13 @@ const parser = (function() {
     }
 
     function expected(description, location) {
-      location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos)
+      location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos);
 
-      throw peg$buildStructuredError(
-          [peg$otherExpectation(description)],
-          input.substring(peg$savedPos, peg$currPos),
-          location
-      );
+      throw peg$buildStructuredError([peg$otherExpectation(description)], input.substring(peg$savedPos, peg$currPos), location);
     }
 
     function error(message, location) {
-      location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos)
+      location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos);
 
       throw peg$buildSimpleError(message, location);
     }
@@ -249,7 +232,8 @@ const parser = (function() {
     }
 
     function peg$computePosDetails(pos) {
-      var details = peg$posDetailsCache[pos], p;
+      var details = peg$posDetailsCache[pos],
+          p;
 
       if (details) {
         return details;
@@ -261,7 +245,7 @@ const parser = (function() {
 
         details = peg$posDetailsCache[p];
         details = {
-          line:   details.line,
+          line: details.line,
           column: details.column
         };
 
@@ -283,24 +267,26 @@ const parser = (function() {
 
     function peg$computeLocation(startPos, endPos) {
       var startPosDetails = peg$computePosDetails(startPos),
-          endPosDetails   = peg$computePosDetails(endPos);
+          endPosDetails = peg$computePosDetails(endPos);
 
       return {
         start: {
           offset: startPos,
-          line:   startPosDetails.line,
+          line: startPosDetails.line,
           column: startPosDetails.column
         },
         end: {
           offset: endPos,
-          line:   endPosDetails.line,
+          line: endPosDetails.line,
           column: endPosDetails.column
         }
       };
     }
 
     function peg$fail(expected) {
-      if (peg$currPos < peg$maxFailPos) { return; }
+      if (peg$currPos < peg$maxFailPos) {
+        return;
+      }
 
       if (peg$currPos > peg$maxFailPos) {
         peg$maxFailPos = peg$currPos;
@@ -315,12 +301,7 @@ const parser = (function() {
     }
 
     function peg$buildStructuredError(expected, found, location) {
-      return new peg$SyntaxError(
-          peg$SyntaxError.buildMessage(expected, found),
-          expected,
-          found,
-          location
-      );
+      return new peg$SyntaxError(peg$SyntaxError.buildMessage(expected, found), expected, found, location);
     }
 
     function peg$parseExpression() {
@@ -338,7 +319,9 @@ const parser = (function() {
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c1); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c1);
+            }
           }
           if (s5 === peg$FAILED) {
             if (input.substr(peg$currPos, 2) === peg$c2) {
@@ -346,7 +329,9 @@ const parser = (function() {
               peg$currPos += 2;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c3); }
+              if (peg$silentFails === 0) {
+                peg$fail(peg$c3);
+              }
             }
           }
           if (s5 !== peg$FAILED) {
@@ -382,7 +367,9 @@ const parser = (function() {
               peg$currPos += 2;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c1); }
+              if (peg$silentFails === 0) {
+                peg$fail(peg$c1);
+              }
             }
             if (s5 === peg$FAILED) {
               if (input.substr(peg$currPos, 2) === peg$c2) {
@@ -390,7 +377,9 @@ const parser = (function() {
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c3); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c3);
+                }
               }
             }
             if (s5 !== peg$FAILED) {
@@ -448,7 +437,9 @@ const parser = (function() {
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c6); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c6);
+            }
           }
           if (s5 === peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 60) {
@@ -456,7 +447,9 @@ const parser = (function() {
               peg$currPos++;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c8); }
+              if (peg$silentFails === 0) {
+                peg$fail(peg$c8);
+              }
             }
             if (s5 === peg$FAILED) {
               if (input.substr(peg$currPos, 2) === peg$c9) {
@@ -464,7 +457,9 @@ const parser = (function() {
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c10); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c10);
+                }
               }
               if (s5 === peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 62) {
@@ -472,7 +467,9 @@ const parser = (function() {
                   peg$currPos++;
                 } else {
                   s5 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c12); }
+                  if (peg$silentFails === 0) {
+                    peg$fail(peg$c12);
+                  }
                 }
                 if (s5 === peg$FAILED) {
                   if (input.charCodeAt(peg$currPos) === 61) {
@@ -480,7 +477,9 @@ const parser = (function() {
                     peg$currPos++;
                   } else {
                     s5 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c14); }
+                    if (peg$silentFails === 0) {
+                      peg$fail(peg$c14);
+                    }
                   }
                   if (s5 === peg$FAILED) {
                     if (input.charCodeAt(peg$currPos) === 42) {
@@ -488,7 +487,9 @@ const parser = (function() {
                       peg$currPos++;
                     } else {
                       s5 = peg$FAILED;
-                      if (peg$silentFails === 0) { peg$fail(peg$c16); }
+                      if (peg$silentFails === 0) {
+                        peg$fail(peg$c16);
+                      }
                     }
                     if (s5 === peg$FAILED) {
                       if (input.charCodeAt(peg$currPos) === 33) {
@@ -496,7 +497,9 @@ const parser = (function() {
                         peg$currPos++;
                       } else {
                         s5 = peg$FAILED;
-                        if (peg$silentFails === 0) { peg$fail(peg$c18); }
+                        if (peg$silentFails === 0) {
+                          peg$fail(peg$c18);
+                        }
                       }
                       if (s5 === peg$FAILED) {
                         if (input.charCodeAt(peg$currPos) === 125) {
@@ -504,7 +507,9 @@ const parser = (function() {
                           peg$currPos++;
                         } else {
                           s5 = peg$FAILED;
-                          if (peg$silentFails === 0) { peg$fail(peg$c20); }
+                          if (peg$silentFails === 0) {
+                            peg$fail(peg$c20);
+                          }
                         }
                         if (s5 === peg$FAILED) {
                           if (input.charCodeAt(peg$currPos) === 123) {
@@ -512,7 +517,9 @@ const parser = (function() {
                             peg$currPos++;
                           } else {
                             s5 = peg$FAILED;
-                            if (peg$silentFails === 0) { peg$fail(peg$c22); }
+                            if (peg$silentFails === 0) {
+                              peg$fail(peg$c22);
+                            }
                           }
                         }
                       }
@@ -556,7 +563,9 @@ const parser = (function() {
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c6); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c6);
+                }
               }
               if (s5 === peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 60) {
@@ -564,7 +573,9 @@ const parser = (function() {
                   peg$currPos++;
                 } else {
                   s5 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c8); }
+                  if (peg$silentFails === 0) {
+                    peg$fail(peg$c8);
+                  }
                 }
                 if (s5 === peg$FAILED) {
                   if (input.substr(peg$currPos, 2) === peg$c9) {
@@ -572,7 +583,9 @@ const parser = (function() {
                     peg$currPos += 2;
                   } else {
                     s5 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c10); }
+                    if (peg$silentFails === 0) {
+                      peg$fail(peg$c10);
+                    }
                   }
                   if (s5 === peg$FAILED) {
                     if (input.charCodeAt(peg$currPos) === 62) {
@@ -580,7 +593,9 @@ const parser = (function() {
                       peg$currPos++;
                     } else {
                       s5 = peg$FAILED;
-                      if (peg$silentFails === 0) { peg$fail(peg$c12); }
+                      if (peg$silentFails === 0) {
+                        peg$fail(peg$c12);
+                      }
                     }
                     if (s5 === peg$FAILED) {
                       if (input.charCodeAt(peg$currPos) === 61) {
@@ -588,7 +603,9 @@ const parser = (function() {
                         peg$currPos++;
                       } else {
                         s5 = peg$FAILED;
-                        if (peg$silentFails === 0) { peg$fail(peg$c14); }
+                        if (peg$silentFails === 0) {
+                          peg$fail(peg$c14);
+                        }
                       }
                       if (s5 === peg$FAILED) {
                         if (input.charCodeAt(peg$currPos) === 42) {
@@ -596,7 +613,9 @@ const parser = (function() {
                           peg$currPos++;
                         } else {
                           s5 = peg$FAILED;
-                          if (peg$silentFails === 0) { peg$fail(peg$c16); }
+                          if (peg$silentFails === 0) {
+                            peg$fail(peg$c16);
+                          }
                         }
                         if (s5 === peg$FAILED) {
                           if (input.charCodeAt(peg$currPos) === 33) {
@@ -604,7 +623,9 @@ const parser = (function() {
                             peg$currPos++;
                           } else {
                             s5 = peg$FAILED;
-                            if (peg$silentFails === 0) { peg$fail(peg$c18); }
+                            if (peg$silentFails === 0) {
+                              peg$fail(peg$c18);
+                            }
                           }
                           if (s5 === peg$FAILED) {
                             if (input.charCodeAt(peg$currPos) === 125) {
@@ -612,7 +633,9 @@ const parser = (function() {
                               peg$currPos++;
                             } else {
                               s5 = peg$FAILED;
-                              if (peg$silentFails === 0) { peg$fail(peg$c20); }
+                              if (peg$silentFails === 0) {
+                                peg$fail(peg$c20);
+                              }
                             }
                             if (s5 === peg$FAILED) {
                               if (input.charCodeAt(peg$currPos) === 123) {
@@ -620,7 +643,9 @@ const parser = (function() {
                                 peg$currPos++;
                               } else {
                                 s5 = peg$FAILED;
-                                if (peg$silentFails === 0) { peg$fail(peg$c22); }
+                                if (peg$silentFails === 0) {
+                                  peg$fail(peg$c22);
+                                }
                               }
                             }
                           }
@@ -732,7 +757,9 @@ const parser = (function() {
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c26); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c26);
+        }
       }
 
       return s0;
@@ -747,7 +774,9 @@ const parser = (function() {
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c28); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c28);
+        }
       }
       while (s1 !== peg$FAILED) {
         s0.push(s1);
@@ -756,7 +785,9 @@ const parser = (function() {
           peg$currPos++;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c28); }
+          if (peg$silentFails === 0) {
+            peg$fail(peg$c28);
+          }
         }
       }
 
@@ -771,7 +802,9 @@ const parser = (function() {
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c30); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c30);
+        }
       }
 
       return s0;
@@ -786,21 +819,15 @@ const parser = (function() {
         peg$fail(peg$endExpectation());
       }
 
-      throw peg$buildStructuredError(
-          peg$maxFailExpected,
-          peg$maxFailPos < input.length ? input.charAt(peg$maxFailPos) : null,
-          peg$maxFailPos < input.length
-              ? peg$computeLocation(peg$maxFailPos, peg$maxFailPos + 1)
-              : peg$computeLocation(peg$maxFailPos, peg$maxFailPos)
-      );
+      throw peg$buildStructuredError(peg$maxFailExpected, peg$maxFailPos < input.length ? input.charAt(peg$maxFailPos) : null, peg$maxFailPos < input.length ? peg$computeLocation(peg$maxFailPos, peg$maxFailPos + 1) : peg$computeLocation(peg$maxFailPos, peg$maxFailPos));
     }
   }
 
   return {
     SyntaxError: peg$SyntaxError,
-    parse:       peg$parse
+    parse: peg$parse
   };
-})();
+}();
 
 class Column {
   constructor(name) {
@@ -819,7 +846,6 @@ class Column {
 
 }
 
-
 class Filter {
 
   /**
@@ -829,20 +855,18 @@ class Filter {
    */
   constructor(availableColumns, parseWasOk, lastFilterQuery) {
 
-
     this.__parseWasOk = parseWasOk;
 
     this.__availableColumns = availableColumns;
 
     this.__lastSuccessfullExpression = '';
 
-
     /**
      * @type {Object<string,function(string, string): Boolean>}
      */
     this.__LOGIC_SYNTAX = {
       //Intersection
-      '&&': (lRows = [], rRows = []) =>  lRows.filter((n) => rRows.indexOf(n) !== -1),
+      '&&': (lRows = [], rRows = []) => lRows.filter(n => rRows.indexOf(n) !== -1),
       //Concatenation with deduplicate;
       '||': (lRows = [], rRows = []) => [...new Set(lRows.concat(rRows)).values()]
     };
@@ -858,30 +882,30 @@ class Filter {
       '=': (value, expectation) => value == expectation,
       '*': (value, expectation) => {
         if (typeof value === 'string') {
-          return value.indexOf(expectation) !== -1
+          return value.indexOf(expectation) !== -1;
         } else {
-          return value.toString().indexOf(expectation) !== -1
+          return value.toString().indexOf(expectation) !== -1;
         }
       },
       '!': (value, expectation) => {
         if (typeof value === 'string') {
-          return value.indexOf(expectation) === -1
+          return value.indexOf(expectation) === -1;
         } else {
-          return value.toString().indexOf(expectation) === -1
+          return value.toString().indexOf(expectation) === -1;
         }
       },
       '{': (value, expectation) => {
         if (typeof value === 'string') {
-          return value.startsWith(expectation)
+          return value.startsWith(expectation);
         } else {
-          return value.toString().startsWith(expectation)
+          return value.toString().startsWith(expectation);
         }
       },
       '}': (value, expectation) => {
         if (typeof value === 'string') {
-          return value.endsWith(expectation)
+          return value.endsWith(expectation);
         } else {
-          return value.toString().endsWith(expectation)
+          return value.toString().endsWith(expectation);
         }
       }
     };
@@ -891,22 +915,20 @@ class Filter {
     this.lastError = '';
 
     this.expression = "";
-    this.setExpression(lastFilterQuery)
+    this.setExpression(lastFilterQuery);
   }
-
 
   setExpression(expression) {
     this.expression = expression;
     this.__parseExpression(expression.trim());
   }
 
-
   __parseExpression(expression) {
     this.lastError = '';
     var lastExpression = this.__parsedExpression;
     if (expression.length > 0) {
       try {
-        this.__parsedExpression = parser.parse(expression, {'startRule': 'Expression'});
+        this.__parsedExpression = parser.parse(expression, { 'startRule': 'Expression' });
       } catch (e) {
         this.lastError = e.message;
       }
@@ -922,7 +944,7 @@ class Filter {
   }
 
   static __isTermValid(term) {
-    return term['col'] && term['act'] && term['exp']
+    return term['col'] && term['act'] && term['exp'];
   }
 
   static __isExpressionValid(expression) {
@@ -930,8 +952,8 @@ class Filter {
   }
 
   __reduceTerm(rows, term) {
-    let {col: columnName, act: action, exp: expectation} = term;
-    return rows.filter((row) => {
+    let { col: columnName, act: action, exp: expectation } = term;
+    return rows.filter(row => {
       let value = row.getValueByColumnName(columnName);
       if (value) {
         return this.__SEARCH_SYNTAX[action](value, expectation);
@@ -941,7 +963,7 @@ class Filter {
   }
 
   __reduceExpression(expression) {
-    let {l: left, r: right, op: operation} = expression;
+    let { l: left, r: right, op: operation } = expression;
     let a = this.__LOGIC_SYNTAX[operation](left, right);
     return a;
   }
@@ -957,7 +979,6 @@ class Filter {
     }
   }
 
-
   filterRow(rows) {
     if (this.__parsedExpression) {
       return this.__reduceTree(rows, Object.assign({}, this.__parsedExpression));
@@ -966,16 +987,15 @@ class Filter {
     }
   }
 
-
   __markColumns(expression) {
-    this.__availableColumns.forEach((column) => {
+    this.__availableColumns.forEach(column => {
       if (expression.indexOf(column.name) !== -1) {
         column.setInFilterExpression(true);
       } else {
         column.setInFilterExpression(false);
       }
     });
-  };
+  }
 }
 
 class Row {
@@ -991,7 +1011,6 @@ class Row {
      */
     this.columns = columns;
 
-
     /**
      * @type {{String, String}}
      */
@@ -1003,12 +1022,12 @@ class Row {
     this.key = key;
 
     columns.forEach(column => {
-      this.values[column.name] = values[column.name]
+      this.values[column.name] = values[column.name];
     });
   }
 
   updateValue(columnName, newValue) {
-    this.values[columnName] = newValue
+    this.values[columnName] = newValue;
   }
 
   /**
@@ -1016,19 +1035,17 @@ class Row {
    * @returns String
    */
   getValue(column) {
-    return this.getValueByColumnName(column.name)
+    return this.getValueByColumnName(column.name);
   }
-
 
   /**
    * @param columnName {String}
    * @returns String
    */
   getValueByColumnName(columnName) {
-    return this.values[columnName]
+    return this.values[columnName];
   }
 }
-
 
 class Table {
   constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap) {
@@ -1046,7 +1063,7 @@ class Table {
       this.columns.push(new Column(columnName));
     });
 
-    rows.forEach((row) => {
+    rows.forEach(row => {
       let rowClass = new Row(row.key, this.columns, row);
       this.rows[rowClass.key] = rowClass;
     });
@@ -1056,18 +1073,18 @@ class Table {
       'order': true
     };
 
-    this.filter = new Filter(this.columns, exportLastFilterQuery, filterQueryForBootstrap,);
+    this.filter = new Filter(this.columns, exportLastFilterQuery, filterQueryForBootstrap);
   }
 
   /**
    * @param rowsUpdate Array<{{String, String}}>
    */
   updateRows(rowsUpdate) {
-    rowsUpdate.forEach((rowUpdate) => {
+    rowsUpdate.forEach(rowUpdate => {
       if (this.rows[rowUpdate.key]) {
         this.columns.forEach(column => {
           if (rowUpdate[column.name]) {
-            this.rows[rowUpdate.key].updateValue(column.name, rowUpdate[column.name])
+            this.rows[rowUpdate.key].updateValue(column.name, rowUpdate[column.name]);
           }
         });
       } else {
@@ -1079,9 +1096,9 @@ class Table {
   }
 
   setColumnVisibility(columnName, visibility) {
-    this.columns.forEach((column) => {
+    this.columns.forEach(column => {
       if (column.name == columnName) {
-        column.setVisibility(visibility)
+        column.setVisibility(visibility);
       }
     });
     return this;
@@ -1124,8 +1141,7 @@ class Table {
    * @returns Array.<Row>
    */
   exportRows() {
-    let rowsArray = Object.keys(this.rows)
-        .map((rowKey) => this.rows[rowKey]);
+    let rowsArray = Object.keys(this.rows).map(rowKey => this.rows[rowKey]);
 
     return this.exportOrderedRows(this.exportFilteredRows(rowsArray));
   }
@@ -1142,7 +1158,7 @@ class Table {
   }
 
   static empty() {
-    return new Table([], [], (expression)=> expression, "");
+    return new Table([], [], expression => expression, "");
   }
 
   getFilterExpression() {
@@ -1154,7 +1170,6 @@ class Table {
   }
 
 }
-
 
 const DEFAULT_LEFT = '8px';
 
@@ -1178,22 +1193,20 @@ class ColumnResizerView extends React.Component {
     this.imgStyle = {
       position: 'relative',
       top: '-9px',
-      left: '-4px',
-    }
-
-
+      left: '-4px'
+    };
   }
 
   componentWillMount() {
-    this.setState({'drag': false});
+    this.setState({ 'drag': false });
   }
 
   updateState(drag, xPosition) {
-    this.setState({drag, xPosition})
+    this.setState({ drag, xPosition });
   }
 
   setXPosition(xPosition) {
-    this.setState({xPosition})
+    this.setState({ xPosition });
   }
 
   generateStyles() {
@@ -1210,29 +1223,29 @@ class ColumnResizerView extends React.Component {
 
   render() {
 
-    let {handleWidthChange} = this.props;
+    let { handleWidthChange } = this.props;
 
-    return (<th
-        style={this.generateStyles()}
-        onDragStart={(e) => {
-          this.updateState(true, e.clientX - 14);
-        }}
-        onDragEnd={(e) => {
-          this.updateState(false, e.clientX - 14);
-        }}
-        onDrag={(e) => {
-          if (this.state.drag && e.clientX !== 0) {
-            this.setXPosition(e.clientX);
-            handleWidthChange(e.clientX, this.state.xPosition);
-          }
-        }}>
-      <img style={this.imgStyle} width="25" height="12" title="" alt=""
-           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg=="/>
-    </th>);
-  };
+    return React.createElement(
+        'th',
+        {
+          style: this.generateStyles(),
+          onDragStart: e => {
+            this.updateState(true, e.clientX - 14);
+          },
+          onDragEnd: e => {
+            this.updateState(false, e.clientX - 14);
+          },
+          onDrag: e => {
+            if (this.state.drag && e.clientX !== 0) {
+              this.setXPosition(e.clientX);
+              handleWidthChange(e.clientX, this.state.xPosition);
+            }
+          } },
+        React.createElement('img', { style: this.imgStyle, width: '25', height: '12', title: '', alt: '',
+          src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg==' })
+    );
+  }
 }
-
-
 
 class ColumnsVisibility extends React.Component {
   constructor(props) {
@@ -1241,29 +1254,32 @@ class ColumnsVisibility extends React.Component {
 
   render() {
 
-    let {onChange, columns} = this.props;
+    let { onChange, columns } = this.props;
 
-    return (
-        <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
-          <label className="control-label">Hide columns</label>
-          <br/>
-          {columns.map(column => {
-            return (
-                <label className="checkbox-inline" key={column.name}>
-                  <input type="checkbox"
-                         value=""
-                         onChange={(evt) => {
-                           onChange(column.name, !evt.target.checked)
-                         }}/>
-                  {column.name}
-                </label>
-            )
-          })}
-        </div>
-    )
+    return React.createElement(
+        'div',
+        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'Hide columns'
+        ),
+        React.createElement('br', null),
+        columns.map(column => {
+          return React.createElement(
+              'label',
+              { className: 'checkbox-inline', key: column.name },
+              React.createElement('input', { type: 'checkbox',
+                value: '',
+                onChange: evt => {
+                  onChange(column.name, !evt.target.checked);
+                } }),
+              column.name
+          );
+        })
+    );
   }
 }
-
 
 class ColumnView extends React.Component {
   constructor(props) {
@@ -1284,7 +1300,6 @@ class ColumnView extends React.Component {
 
   render() {
 
-
     let {
         column,
         orderedByColumn,
@@ -1302,21 +1317,22 @@ class ColumnView extends React.Component {
     }
 
     if (width) {
-      style['width'] = width + 'px'
+      style['width'] = width + 'px';
     }
 
-    return (<th key={column.name}
-                style={style}
-                className={column.inFilterExpression ? "active" : "" }>
-              <span
-                  className={this.orderingIconClass(column.name, orderedByColumn)}
-                  onClick={() => columnOrderingHandler(column.name)}/>
-      &nbsp;{column.name}
-
-    </th>);
-  };
+    return React.createElement(
+        'th',
+        { key: column.name,
+          style: style,
+          className: column.inFilterExpression ? "active" : "" },
+        React.createElement('span', {
+          className: this.orderingIconClass(column.name, orderedByColumn),
+          onClick: () => columnOrderingHandler(column.name) }),
+        '\xA0',
+        column.name
+    );
+  }
 }
-
 
 class Header extends React.Component {
   constructor(props) {
@@ -1333,10 +1349,10 @@ class Header extends React.Component {
   toggleOrdering(columnName) {
     let order = true;
     if (this.state.columnName !== columnName) {
-      this.setOrdering(columnName, true)
+      this.setOrdering(columnName, true);
     } else {
       order = !this.state.order;
-      this.setOrdering(columnName, order)
+      this.setOrdering(columnName, order);
     }
     return order;
   }
@@ -1346,19 +1362,19 @@ class Header extends React.Component {
 
     const newState = Object.assign({}, this.state.columnsWidth);
 
-    const leftKey = `columnsWidth.${leftColumn}`;
-    const rightKey = `columnsWidth.${rightColumn}`;
+    const leftKey = `columnsWidth.${ leftColumn }`;
+    const rightKey = `columnsWidth.${ rightColumn }`;
 
     newState[rightColumn] = newState[rightColumn] + diff > 0 ? newState[rightColumn] + diff : 0;
     newState[leftColumn] = newState[leftColumn] - diff > 0 ? newState[leftColumn] - diff : 0;
 
-    this.setState({columnsWidth: newState})
+    this.setState({ columnsWidth: newState });
   }
 
   updateWidth() {
     this.setState({
       elWidth: ReactDOM.findDOMNode(this).getBoundingClientRect().width
-    })
+    });
   }
 
   recalculateWidth() {
@@ -1373,15 +1389,14 @@ class Header extends React.Component {
 
     columns.forEach(column => {
       if (initialState) {
-        multipliers[column.name] = (currentSizes[column.name] / initialState );
+        multipliers[column.name] = currentSizes[column.name] / initialState;
       } else {
         initialState = currentSizes[column.name];
-        multipliers[column.name] = 1
+        multipliers[column.name] = 1;
       }
     });
 
-    const multipliersSum =
-        Object.keys(multipliers).reduce((a, b) => a + multipliers[b], 0);
+    const multipliersSum = Object.keys(multipliers).reduce((a, b) => a + multipliers[b], 0);
 
     const columnWidth = Math.floor(width / multipliersSum);
 
@@ -1389,9 +1404,8 @@ class Header extends React.Component {
       state[column.name] = multipliers[column.name] * columnWidth;
     });
 
-    this.setState({columnsWidth: state})
+    this.setState({ columnsWidth: state });
   }
-
 
   populateColumns(columns) {
     const width = ReactDOM.findDOMNode(this).getBoundingClientRect().width;
@@ -1399,21 +1413,19 @@ class Header extends React.Component {
 
     const state = {};
 
-    columns.forEach((column) => {
+    columns.forEach(column => {
       state[column.name] = columnWidth;
     });
 
-    this.setState({columnsWidth: state});
+    this.setState({ columnsWidth: state });
   }
 
   initState() {
-    this.setState(
-        {
-          columnName: null,
-          order: null,
-          columnsWidth: {}
-        }
-    )
+    this.setState({
+      columnName: null,
+      order: null,
+      columnsWidth: {}
+    });
   }
 
   componentDidMount() {
@@ -1431,51 +1443,47 @@ class Header extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.visibleColumns.length !==
-        this.props.visibleColumns.length) {
+    if (nextProps.visibleColumns.length !== this.props.visibleColumns.length) {
       this.populateColumns(nextProps.visibleColumns);
     }
   }
 
   render() {
 
-    let {columns, columnOrderingHandler, orderingColumn}= this.props;
-    let {columnsWidth} = this.state;
+    let { columns, columnOrderingHandler, orderingColumn } = this.props;
+    let { columnsWidth } = this.state;
 
-    return (
-        <thead>
-        <tr>
-          {columns.map((column, idx) => {
-            if (column.visibility) {
-              const notLast = idx < (columns.length - 1);
+    return React.createElement(
+        'thead',
+        null,
+        React.createElement(
+            'tr',
+            null,
+            columns.map((column, idx) => {
+              if (column.visibility) {
+                const notLast = idx < columns.length - 1;
 
-              let result = [
-                <ColumnView
-                    column={column}
-                    orderedByColumn={orderingColumn}
-                    notLast={notLast}
-                    width={columnsWidth[column.name]}
-                    order={this.state.order}
-                    columnOrderingHandler={(columnName) => columnOrderingHandler(columnName, this.toggleOrdering(columnName))}/>
-              ];
+                let result = [React.createElement(ColumnView, {
+                  column: column,
+                  orderedByColumn: orderingColumn,
+                  notLast: notLast,
+                  width: columnsWidth[column.name],
+                  order: this.state.order,
+                  columnOrderingHandler: columnName => columnOrderingHandler(columnName, this.toggleOrdering(columnName)) })];
 
-              if (notLast) {
-                result.push(<ColumnResizerView
-                    handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, columns[idx + 1].name)}
-                />)
+                if (notLast) {
+                  result.push(React.createElement(ColumnResizerView, {
+                    handleWidthChange: (curX, initX) => this.handleWidthChange(curX, initX, column.name, columns[idx + 1].name)
+                  }));
+                }
+
+                return result;
               }
-
-              return (result);
-            }
-          })}
-        </tr>
-        </thead>
-    )
-  };
+            })
+        )
+    );
+  }
 }
-
-
-
 
 class RowView extends React.Component {
   constructor(props) {
@@ -1489,16 +1497,17 @@ class RowView extends React.Component {
      */
     let row = this.props.row;
 
-
-    return (
-        <tr>
-          {row.columns.map(column => column.visibility ?
-              <td colSpan="2">{row.getValue(column)}</td> : null)}
-        </tr>
-    )
-  };
+    return React.createElement(
+        'tr',
+        null,
+        row.columns.map(column => column.visibility ? React.createElement(
+            'td',
+            { colSpan: '2' },
+            row.getValue(column)
+        ) : null)
+    );
+  }
 }
-
 
 class QueryInput extends React.Component {
   constructor(props) {
@@ -1517,24 +1526,26 @@ class QueryInput extends React.Component {
 
   render() {
 
-    let {onChange, query, error} = this.props;
+    let { onChange, query, error } = this.props;
     let hasError = !!error;
 
-    return (
-        <div className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
-          <label htmlFor='tableViewFilterQuery'>Filter Query</label>
-          <input
-              id='tableViewFilterQuery'
-              type='text'
-              className='form-control'
-              onChange={(evt) => onChange(evt.target.value)}
-              value={query}/>
-        </div>
-    )
+    return React.createElement(
+        'div',
+        { className: QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError) },
+        React.createElement(
+            'label',
+            { htmlFor: 'tableViewFilterQuery' },
+            'Filter Query'
+        ),
+        React.createElement('input', {
+          id: 'tableViewFilterQuery',
+          type: 'text',
+          className: 'form-control',
+          onChange: evt => onChange(evt.target.value),
+          value: query })
+    );
   }
 }
-
-
 
 class FilterView extends React.Component {
   constructor(props) {
@@ -1543,33 +1554,46 @@ class FilterView extends React.Component {
 
   render() {
 
-    let {table, filterHandler, columnsVisibilityHandler, resetOrdering} = this.props;
+    let { table, filterHandler, columnsVisibilityHandler, resetOrdering } = this.props;
 
-    return (
-        <div className="panel panel-default">
-          <div className="panel-heading">
-            <h3 className="panel-title">Table filtering</h3>
-          </div>
-
-          <div className="panel-body">
-
-            <QueryInput onChange={filterHandler}
-                        query={table.getFilterExpression()}
-                        error={table.getFilterError()}/>
-
-            <ColumnsVisibility columns={table.columns}
-                               onChange={columnsVisibilityHandler}/>
-
-            <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
-              <label className="control-label">Ordering</label>
-              <br/>
-              <button type="button" className="btn btn-danger"
-                      onClick={resetOrdering}> Reset
-              </button>
-            </div>
-          </div>
-        </div>
-    )
+    return React.createElement(
+        'div',
+        { className: 'panel panel-default' },
+        React.createElement(
+            'div',
+            { className: 'panel-heading' },
+            React.createElement(
+                'h3',
+                { className: 'panel-title' },
+                'Table filtering'
+            )
+        ),
+        React.createElement(
+            'div',
+            { className: 'panel-body' },
+            React.createElement(QueryInput, { onChange: filterHandler,
+              query: table.getFilterExpression(),
+              error: table.getFilterError() }),
+            React.createElement(ColumnsVisibility, { columns: table.columns,
+              onChange: columnsVisibilityHandler }),
+            React.createElement(
+                'div',
+                { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+                React.createElement(
+                    'label',
+                    { className: 'control-label' },
+                    'Ordering'
+                ),
+                React.createElement('br', null),
+                React.createElement(
+                    'button',
+                    { type: 'button', className: 'btn btn-danger',
+                      onClick: resetOrdering },
+                    ' Reset'
+                )
+            )
+        )
+    );
   }
 }
 
@@ -1579,84 +1603,81 @@ class TableView extends React.Component {
   }
 
   filterHandler(expression) {
-    this.setState({td: this.state.td.setFilterExpression(expression)})
+    this.setState({ td: this.state.td.setFilterExpression(expression) });
   }
 
   columnsVisibilityHandler(column, value) {
-    this.setState({td: this.state.td.setColumnVisibility(column, value)});
+    this.setState({ td: this.state.td.setColumnVisibility(column, value) });
   }
 
   columnOrderingHandler(columnName, order) {
-    this.setState({td: this.state.td.setOrdering(columnName, order)});
+    this.setState({ td: this.state.td.setOrdering(columnName, order) });
   }
 
   resetOrdering() {
-    this.setState({td: this.state.td.setOrdering(null, null)});
+    this.setState({ td: this.state.td.setOrdering(null, null) });
   }
 
   bootstrapTable(data, filterQueryExporter, filterQuery) {
     this.setState({
-      td: new Table(
-          data.columns,
-          data.rows,
-          filterQueryExporter,
-          filterQuery)
+      td: new Table(data.columns, data.rows, filterQueryExporter, filterQuery)
     });
   }
 
   updateTable(data) {
-    this.setState({td: this.state.td.updateRows(data.rows)});
+    this.setState({ td: this.state.td.updateRows(data.rows) });
   }
 
   componentWillMount() {
-    this.setState({td: Table.empty()});
+    this.setState({ td: Table.empty() });
   }
 
   componentDidMount() {
-    let {socket, eventName, filterQueryExporter = (expression)=> expression, filterQuery = ""} = this.props;
-    socket.on(eventName, (data) => {
+    let { socket, eventName, filterQueryExporter = expression => expression, filterQuery = "" } = this.props;
+    socket.on(eventName, data => {
       if (data && data.columns && data.rows) {
         this.bootstrapTable(data, filterQueryExporter, filterQuery);
       } else if (data && data.rows) {
         this.updateTable(data);
       }
-    })
+    });
   }
-
 
   render() {
 
-    let {td: table} = this.state;
+    let { td: table } = this.state;
 
     if (table.columns.length > 0) {
-      return (
-          <div className="container-fluid">
-
-            <FilterView
-                table={table}
-                filterHandler={(expr) => this.filterHandler(expr)}
-                columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
-                resetOrdering={() => this.resetOrdering()}
-            />
-            <table className="table table-responsive table-bordered">
-              <Header
-                  columns={table.columns}
-                  visibleColumns={table.columns.filter(col => col.visibility)}
-                  columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
-                  orderingColumn={table.ordering.column}
-              />
-
-              <tbody>
-              {table.exportRows().map(row => <RowView
-                  key={row.key}
-                  row={row}/>)}
-              </tbody>
-            </table>
-          </div>
-      )
+      return React.createElement(
+          'div',
+          { className: 'container-fluid' },
+          React.createElement(FilterView, {
+            table: table,
+            filterHandler: expr => this.filterHandler(expr),
+            columnsVisibilityHandler: (column, value) => this.columnsVisibilityHandler(column, value),
+            resetOrdering: () => this.resetOrdering()
+          }),
+          React.createElement(
+              'table',
+              { className: 'table table-responsive table-bordered' },
+              React.createElement(Header, {
+                columns: table.columns,
+                visibleColumns: table.columns.filter(col => col.visibility),
+                columnOrderingHandler: (columnName, order) => this.columnOrderingHandler(columnName, order),
+                orderingColumn: table.ordering.column
+              }),
+              React.createElement(
+                  'tbody',
+                  null,
+                  table.exportRows().map(row => React.createElement(RowView, {
+                    key: row.key,
+                    row: row }))
+              )
+          )
+      );
     }
-    return (null);
-  };
+    return null;
+  }
 }
 
 export default TableView;

@@ -4,8 +4,8 @@ require('tablefilter');
 
 import React from 'react'
 import {render} from 'react-dom'
-import TableView from './components/TableView.jsx'
-// import TableView from '../../dist/TableViewDist.jsx';
+// import TableView from './components/TableView.jsx'
+import TableView from '../../dist/TableViewDist.jsx';
 let socket = require('socket.io-client')('http://localhost:3000');
 
 render(

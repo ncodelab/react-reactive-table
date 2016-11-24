@@ -118,6 +118,12 @@ class Header extends React.Component {
     window.addEventListener("resize", () => this.recalculateWidth());
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.visibleColumns.length !==
+        this.props.visibleColumns.length) {
+      this.populateColumns(nextProps.visibleColumns);
+    }
+  }
 
   render() {
 
