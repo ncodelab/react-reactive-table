@@ -14,7 +14,8 @@ render(
             socket={socket}
             eventName="event"
             filterQuery=''
-            filterQueryExporter={(expr) => console.log(expr)}/>
+            filterQueryExporter={(expr) => console.log(expr)}
+            pageSize={20}/>
     </div>,
     document.getElementById('application')
 );

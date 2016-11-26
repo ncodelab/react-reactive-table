@@ -1,14 +1,16 @@
 import Column from './Column.jsx';
 import Row from './Row.jsx';
 import Filter from './Filter.jsx';
+import {moveSide} from '../components/ColumnView.jsx';
 
 class Table {
-  constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap) {
+  constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap, pageSize) {
     /**
      * @type {{String, Row}}
      */
     this.rows = {};
 
+    this.initialColumnOrder = [];
     /**
      * @type {Array<Column>}
      */
@@ -17,6 +19,8 @@ class Table {
     columnNames.forEach(columnName => {
       this.columns.push(new Column(columnName));
     });
+
+    this.initialColumnOrder = this.columns.slice();
 
     rows.forEach((row) => {
       let rowClass = new Row(row.key, this.columns, row);
@@ -28,7 +32,52 @@ class Table {
       'order': true
     };
 
+    this.pageSize = pageSize;
+
+    this.currentPage = 1;
+
     this.filter = new Filter(this.columns, exportLastFilterQuery, filterQueryForBootstrap,);
+  }
+
+  getMaxPage() {
+    return Math.ceil(Object.keys(this.exportFilteredRows(this.getRowsArray())).length / this.pageSize);
+  }
+
+  resetColumnOrdering() {
+    while (this.columns.pop() != undefined) {
+      this.columns.pop();
+    }
+
+    this.initialColumnOrder.forEach((column, idx) => {
+      this.columns[idx] = column;
+    });
+    return this;
+  }
+
+  reorderColumn(side, columnName) {
+
+    for (let idx = 0; idx < this.columns.length; idx++) {
+      if (this.columns[idx].name === columnName) {
+        if (side === moveSide.RIGHT) {
+          const buff = this.columns[idx + 1];
+          this.columns[idx + 1] = this.columns[idx];
+          this.columns[idx] = buff;
+          break;
+        } else if (side === moveSide.LEFT) {
+          const buff = this.columns[idx - 1];
+          this.columns[idx - 1] = this.columns[idx];
+          this.columns[idx] = buff;
+          break;
+        }
+      }
+    }
+
+    return this;
+  }
+
+  setCurrentPage(pageNum) {
+    this.currentPage = pageNum;
+    return this;
   }
 
   /**
@@ -92,14 +141,17 @@ class Table {
     return this.filter.filterRow(rows);
   }
 
+  getRowsArray() {
+    return Object.keys(this.rows).map((rowKey) => this.rows[rowKey]);
+  }
+
   /**
    * @returns Array.<Row>
    */
   exportRows() {
-    let rowsArray = Object.keys(this.rows)
-        .map((rowKey) => this.rows[rowKey]);
+    let orderedRows = this.exportOrderedRows(this.exportFilteredRows(this.getRowsArray()));
 
-    return this.exportOrderedRows(this.exportFilteredRows(rowsArray));
+    return orderedRows.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize)
   }
 
   setOrdering(columnName, order) {
@@ -109,12 +161,13 @@ class Table {
   }
 
   setFilterExpression(expression) {
+    this.setCurrentPage(1);
     this.filter.setExpression(expression);
     return this;
   }
 
   static empty() {
-    return new Table([], [], (expression)=> expression, "");
+    return new Table([], [], (expression) => expression, "");
   }
 
   getFilterExpression() {
@@ -126,6 +179,5 @@ class Table {
   }
 
 }
-
 
 export default Table;

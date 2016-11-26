@@ -1,6 +1,5 @@
 import React from 'react';
 
-
 class QueryInput extends React.Component {
   constructor(props) {
     super(props);
@@ -22,15 +21,16 @@ class QueryInput extends React.Component {
     let hasError = !!error;
 
     return (
-        <div className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
-          <label htmlFor='tableViewFilterQuery'>Filter Query</label>
-          <input
-              id='tableViewFilterQuery'
-              type='text'
-              className='form-control'
-              onChange={(evt) => onChange(evt.target.value)}
-              value={query}/>
-        </div>
+      <div
+        className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
+        <label htmlFor='tableViewFilterQuery'>Filter Query</label>
+        <input
+          id='tableViewFilterQuery'
+          type='text'
+          className='form-control'
+          onChange={(evt) => onChange(evt.target.value)}
+          value={query}/>
+      </div>
     )
   }
 }

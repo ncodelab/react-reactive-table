@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-const parser = function () {
+export const parser = function () {
   "use strict";
 
   function peg$subclass(child, parent) {
@@ -131,14 +131,14 @@ const parser = function () {
         peg$c2 = "||",
         peg$c3 = peg$literalExpectation("||", false),
         peg$c4 = function (head, tail) {
-          return tail.reduce(function (result, element) {
-            return {
-              'l': result,
-              'r': element[3],
-              'op': element[1]
-            };
-          }, head);
-        },
+      return tail.reduce(function (result, element) {
+        return {
+          'l': result,
+          'r': element[3],
+          'op': element[1]
+        };
+      }, head);
+    },
         peg$c5 = "<=",
         peg$c6 = peg$literalExpectation("<=", false),
         peg$c7 = "<",
@@ -158,17 +158,17 @@ const parser = function () {
         peg$c21 = "{",
         peg$c22 = peg$literalExpectation("{", false),
         peg$c23 = function (head, tail) {
-          return tail.reduce(function (result, element) {
-            return {
-              'col': result[1],
-              'act': element[1],
-              'exp': element[3]
-            };
-          }, head);
-        },
+      return tail.reduce(function (result, element) {
+        return {
+          'col': result[1],
+          'act': element[1],
+          'exp': element[3]
+        };
+      }, head);
+    },
         peg$c24 = function (chars) {
-          return chars.join("");
-        },
+      return chars.join("");
+    },
         peg$c25 = /^[a-zA-Z0-9]/,
         peg$c26 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"]], false, false),
         peg$c27 = /^[ \t\n\r]/,
@@ -997,7 +997,6 @@ class Filter {
     });
   }
 }
-
 class Row {
   /**
    * @param key {String}
@@ -1048,12 +1047,13 @@ class Row {
 }
 
 class Table {
-  constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap) {
+  constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap, pageSize) {
     /**
      * @type {{String, Row}}
      */
     this.rows = {};
 
+    this.initialColumnOrder = [];
     /**
      * @type {Array<Column>}
      */
@@ -1062,6 +1062,8 @@ class Table {
     columnNames.forEach(columnName => {
       this.columns.push(new Column(columnName));
     });
+
+    this.initialColumnOrder = this.columns.slice();
 
     rows.forEach(row => {
       let rowClass = new Row(row.key, this.columns, row);
@@ -1073,7 +1075,52 @@ class Table {
       'order': true
     };
 
+    this.pageSize = pageSize;
+
+    this.currentPage = 1;
+
     this.filter = new Filter(this.columns, exportLastFilterQuery, filterQueryForBootstrap);
+  }
+
+  getMaxPage() {
+    return Math.ceil(Object.keys(this.exportFilteredRows(this.getRowsArray())).length / this.pageSize);
+  }
+
+  resetColumnOrdering() {
+    while (this.columns.pop() != undefined) {
+      this.columns.pop();
+    }
+
+    this.initialColumnOrder.forEach((column, idx) => {
+      this.columns[idx] = column;
+    });
+    return this;
+  }
+
+  reorderColumn(side, columnName) {
+
+    for (let idx = 0; idx < this.columns.length; idx++) {
+      if (this.columns[idx].name === columnName) {
+        if (side === moveSide.RIGHT) {
+          const buff = this.columns[idx + 1];
+          this.columns[idx + 1] = this.columns[idx];
+          this.columns[idx] = buff;
+          break;
+        } else if (side === moveSide.LEFT) {
+          const buff = this.columns[idx - 1];
+          this.columns[idx - 1] = this.columns[idx];
+          this.columns[idx] = buff;
+          break;
+        }
+      }
+    }
+
+    return this;
+  }
+
+  setCurrentPage(pageNum) {
+    this.currentPage = pageNum;
+    return this;
   }
 
   /**
@@ -1137,13 +1184,17 @@ class Table {
     return this.filter.filterRow(rows);
   }
 
+  getRowsArray() {
+    return Object.keys(this.rows).map(rowKey => this.rows[rowKey]);
+  }
+
   /**
    * @returns Array.<Row>
    */
   exportRows() {
-    let rowsArray = Object.keys(this.rows).map(rowKey => this.rows[rowKey]);
+    let orderedRows = this.exportOrderedRows(this.exportFilteredRows(this.getRowsArray()));
 
-    return this.exportOrderedRows(this.exportFilteredRows(rowsArray));
+    return orderedRows.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
   }
 
   setOrdering(columnName, order) {
@@ -1153,6 +1204,7 @@ class Table {
   }
 
   setFilterExpression(expression) {
+    this.setCurrentPage(1);
     this.filter.setExpression(expression);
     return this;
   }
@@ -1226,23 +1278,23 @@ class ColumnResizerView extends React.Component {
     let { handleWidthChange } = this.props;
 
     return React.createElement(
-        'th',
-        {
-          style: this.generateStyles(),
-          onDragStart: e => {
-            this.updateState(true, e.clientX - 14);
-          },
-          onDragEnd: e => {
-            this.updateState(false, e.clientX - 14);
-          },
-          onDrag: e => {
-            if (this.state.drag && e.clientX !== 0) {
-              this.setXPosition(e.clientX);
-              handleWidthChange(e.clientX, this.state.xPosition);
-            }
-          } },
-        React.createElement('img', { style: this.imgStyle, width: '25', height: '12', title: '', alt: '',
-          src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg==' })
+      'th',
+      {
+        style: this.generateStyles(),
+        onDragStart: e => {
+          this.updateState(true, e.clientX - 14);
+        },
+        onDragEnd: e => {
+          this.updateState(false, e.clientX - 14);
+        },
+        onDrag: e => {
+          if (this.state.drag && e.clientX !== 0) {
+            this.setXPosition(e.clientX);
+            handleWidthChange(e.clientX, this.state.xPosition);
+          }
+        } },
+      React.createElement('img', { style: this.imgStyle, width: '25', height: '12', title: '', alt: '',
+        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg==' })
     );
   }
 }
@@ -1257,35 +1309,37 @@ class ColumnsVisibility extends React.Component {
     let { onChange, columns } = this.props;
 
     return React.createElement(
-        'div',
-        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
-        React.createElement(
-            'label',
-            { className: 'control-label' },
-            'Hide columns'
-        ),
-        React.createElement('br', null),
-        columns.map(column => {
-          return React.createElement(
-              'label',
-              { className: 'checkbox-inline', key: column.name },
-              React.createElement('input', { type: 'checkbox',
-                value: '',
-                onChange: evt => {
-                  onChange(column.name, !evt.target.checked);
-                } }),
-              column.name
-          );
-        })
+      'div',
+      { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+      React.createElement(
+        'label',
+        { className: 'control-label' },
+        'Hide columns'
+      ),
+      React.createElement('br', null),
+      columns.map(column => {
+        return React.createElement(
+          'label',
+          { className: 'checkbox-inline', key: column.name },
+          React.createElement('input', { type: 'checkbox',
+            value: '',
+            onChange: evt => {
+              onChange(column.name, !evt.target.checked);
+            } }),
+          column.name
+        );
+      })
     );
   }
 }
-
+export const moveSide = {
+  RIGHT: 'right',
+  LEFT: 'left'
+};
 class ColumnView extends React.Component {
   constructor(props) {
     super(props);
   }
-
   orderingIconClass(columnName, orderingColumnName) {
     if (orderingColumnName !== columnName) {
       return "glyphicon glyphicon-sort";
@@ -1297,39 +1351,113 @@ class ColumnView extends React.Component {
       return "glyphicon glyphicon-sort";
     }
   }
-
   render() {
-
     let {
-        column,
-        orderedByColumn,
-        columnOrderingHandler,
-        notLast,
-        width
+      column,
+      orderedByColumn,
+      columnOrderingHandler,
+      notLast,
+      width,
+      first,
+      last,
+      columnMoveHandler
     } = this.props;
 
     const style = {};
-
     if (notLast) {
       style['borderRight'] = '0px';
     } else {
       style['borderRight'] = undefined;
     }
-
     if (width) {
       style['width'] = width + 'px';
     }
-
     return React.createElement(
-        'th',
-        { key: column.name,
-          style: style,
-          className: column.inFilterExpression ? "active" : "" },
-        React.createElement('span', {
-          className: this.orderingIconClass(column.name, orderedByColumn),
-          onClick: () => columnOrderingHandler(column.name) }),
-        '\xA0',
-        column.name
+      'th',
+      { key: column.name, style: style, className: column.inFilterExpression ? "active" : "" },
+      !first ? React.createElement('span', { className: 'glyphicon glyphicon-arrow-left', onClick: () => columnMoveHandler(moveSide.LEFT, column.name) }) : null,
+      '\xA0',
+      React.createElement('span', { className: this.orderingIconClass(column.name, orderedByColumn), onClick: () => columnOrderingHandler(column.name) }),
+      '\xA0',
+      column.name,
+      ' ',
+      !last && notLast ? React.createElement('span', { style: {
+          float: 'right',
+          marginRight: '-15px',
+          marginTop: '1px'
+        }, className: 'glyphicon glyphicon-arrow-right', onClick: () => columnMoveHandler(moveSide.RIGHT, column.name) }) : null
+    );
+  }
+}
+class FilterView extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    let { table, filterHandler, columnsVisibilityHandler, resetOrdering, resetColumnOrdering } = this.props;
+    return React.createElement(
+      'div',
+      { className: 'panel-group', id: 'table-filtering-accordion', role: 'tablist', 'aria-multiselectable': 'true' },
+      React.createElement(
+        'div',
+        { className: 'panel panel-default' },
+        React.createElement(
+          'div',
+          { className: 'panel-heading', role: 'tab', id: 'headingFiltering' },
+          React.createElement(
+            'a',
+            { className: 'collapsed', role: 'button', 'data-toggle': 'collapse', 'data-parent': '#accordion', href: '#collapseFiltering', 'aria-expanded': 'false', 'aria-controls': 'collapseFiltering' },
+            React.createElement(
+              'h4',
+              { className: 'panel-title' },
+              'Table Filtering'
+            )
+          )
+        ),
+        React.createElement(
+          'div',
+          { id: 'collapseFiltering', className: 'panel-collapse collapse', role: 'tabpanel', 'aria-labelledby': 'headingFiltering' },
+          React.createElement(
+            'div',
+            { className: 'panel-body' },
+            React.createElement(QueryInput, { onChange: filterHandler, query: table.getFilterExpression(), error: table.getFilterError() }),
+            React.createElement(ColumnsVisibility, { columns: table.columns, onChange: columnsVisibilityHandler }),
+            React.createElement(
+              'div',
+              { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+              React.createElement(
+                'label',
+                { className: 'control-label' },
+                'Reset'
+              ),
+              React.createElement('br', null),
+              React.createElement(
+                'div',
+                { className: 'row' },
+                React.createElement(
+                  'div',
+                  { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
+                  React.createElement(
+                    'button',
+                    { type: 'button', className: 'btn btn-danger', onClick: resetOrdering },
+                    'Ordering by value'
+                  )
+                ),
+                React.createElement('div', { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' }),
+                React.createElement(
+                  'div',
+                  { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
+                  React.createElement(
+                    'button',
+                    { type: 'button', className: 'btn btn-danger', onClick: resetColumnOrdering },
+                    'Column position'
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
     );
   }
 }
@@ -1407,7 +1535,7 @@ class Header extends React.Component {
     this.setState({ columnsWidth: state });
   }
 
-  populateColumns(columns) {
+  populateColumns(columns, silent) {
     const width = ReactDOM.findDOMNode(this).getBoundingClientRect().width;
     const columnWidth = Math.floor(width / columns.length);
 
@@ -1417,7 +1545,10 @@ class Header extends React.Component {
       state[column.name] = columnWidth;
     });
 
-    this.setState({ columnsWidth: state });
+    if (!silent) {
+      this.setState({ columnsWidth: state });
+    }
+    return state;
   }
 
   initState() {
@@ -1450,65 +1581,104 @@ class Header extends React.Component {
 
   render() {
 
-    let { columns, columnOrderingHandler, orderingColumn } = this.props;
+    let { columns, columnOrderingHandler, orderingColumn, columnMoveHandler } = this.props;
     let { columnsWidth } = this.state;
 
     return React.createElement(
-        'thead',
+      'thead',
+      null,
+      React.createElement(
+        'tr',
         null,
-        React.createElement(
-            'tr',
-            null,
-            columns.map((column, idx) => {
-              if (column.visibility) {
-                const notLast = idx < columns.length - 1;
+        columns.filter(column => column.visibility).map((column, idx, collection) => {
 
-                let result = [React.createElement(ColumnView, {
-                  column: column,
-                  orderedByColumn: orderingColumn,
-                  notLast: notLast,
-                  width: columnsWidth[column.name],
-                  order: this.state.order,
-                  columnOrderingHandler: columnName => columnOrderingHandler(columnName, this.toggleOrdering(columnName)) })];
+          const notLast = idx < collection.length - 1;
+          const last = idx === collection.length;
+          const first = idx === 0;
 
-                if (notLast) {
-                  result.push(React.createElement(ColumnResizerView, {
-                    handleWidthChange: (curX, initX) => this.handleWidthChange(curX, initX, column.name, columns[idx + 1].name)
-                  }));
-                }
+          let result = [React.createElement(ColumnView, {
+            column: column,
+            orderedByColumn: orderingColumn,
+            notLast: notLast,
+            last: last,
+            first: first,
+            width: columnsWidth[column.name],
+            order: this.state.order,
+            columnMoveHandler: columnMoveHandler,
+            columnOrderingHandler: columnName => columnOrderingHandler(columnName, this.toggleOrdering(columnName)) })];
 
-                return result;
-              }
-            })
-        )
+          if (notLast) {
+            result.push(React.createElement(ColumnResizerView, {
+              handleWidthChange: (curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)
+            }));
+          }
+
+          return result;
+        })
+      )
     );
   }
 }
-
-class RowView extends React.Component {
+class PaginationView extends React.Component {
   constructor(props) {
     super(props);
   }
 
+  renderPageCounter(table, handlePageSet) {
+    let pages = [];
+    for (let counter = 1; counter < table.getMaxPage() + 1; counter++) {
+      pages.push(React.createElement(
+        'li',
+        { key: counter, className: counter === table.currentPage ? 'active' : '' },
+        React.createElement(
+          'a',
+          { onClick: () => handlePageSet(counter) },
+          counter,
+          React.createElement('span', { className: 'sr-only' })
+        )
+      ));
+    }
+    return pages;
+  }
   render() {
-
-    /**
-     * @type {Row}
-     */
-    let row = this.props.row;
-
+    let { table, handlePageSet } = this.props;
     return React.createElement(
-        'tr',
-        null,
-        row.columns.map(column => column.visibility ? React.createElement(
-            'td',
-            { colSpan: '2' },
-            row.getValue(column)
-        ) : null)
+      'nav',
+      { 'aria-label': '...' },
+      React.createElement(
+        'ul',
+        { className: 'pagination' },
+        React.createElement(
+          'li',
+          { className: table.currentPage === 1 ? 'disabled' : '' },
+          React.createElement(
+            'a',
+            { 'aria-label': 'Previous', onClick: () => handlePageSet(1) },
+            React.createElement(
+              'span',
+              { 'aria-hidden': 'true' },
+              '\xAB'
+            )
+          )
+        ),
+        this.renderPageCounter(table, handlePageSet),
+        React.createElement(
+          'li',
+          { className: table.currentPage === table.getMaxPage() ? 'disabled' : '' },
+          React.createElement(
+            'a',
+            { 'aria-label': 'Next', onClick: () => handlePageSet(table.getMaxPage()) },
+            React.createElement(
+              'span',
+              { 'aria-hidden': 'true' },
+              '\xBB'
+            )
+          )
+        )
+      )
     );
   }
 }
-
 class QueryInput extends React.Component {
   constructor(props) {
     super(props);
@@ -1530,76 +1700,64 @@ class QueryInput extends React.Component {
     let hasError = !!error;
 
     return React.createElement(
-        'div',
-        { className: QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError) },
-        React.createElement(
-            'label',
-            { htmlFor: 'tableViewFilterQuery' },
-            'Filter Query'
-        ),
-        React.createElement('input', {
-          id: 'tableViewFilterQuery',
-          type: 'text',
-          className: 'form-control',
-          onChange: evt => onChange(evt.target.value),
-          value: query })
+      'div',
+      {
+        className: QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError) },
+      React.createElement(
+        'label',
+        { htmlFor: 'tableViewFilterQuery' },
+        'Filter Query'
+      ),
+      React.createElement('input', {
+        id: 'tableViewFilterQuery',
+        type: 'text',
+        className: 'form-control',
+        onChange: evt => onChange(evt.target.value),
+        value: query })
     );
   }
 }
-
-class FilterView extends React.Component {
+class RowView extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
 
-    let { table, filterHandler, columnsVisibilityHandler, resetOrdering } = this.props;
+    /**
+     * @type {Row}
+     */
+    let row = this.props.row;
 
     return React.createElement(
-        'div',
-        { className: 'panel panel-default' },
-        React.createElement(
-            'div',
-            { className: 'panel-heading' },
-            React.createElement(
-                'h3',
-                { className: 'panel-title' },
-                'Table filtering'
-            )
-        ),
-        React.createElement(
-            'div',
-            { className: 'panel-body' },
-            React.createElement(QueryInput, { onChange: filterHandler,
-              query: table.getFilterExpression(),
-              error: table.getFilterError() }),
-            React.createElement(ColumnsVisibility, { columns: table.columns,
-              onChange: columnsVisibilityHandler }),
-            React.createElement(
-                'div',
-                { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
-                React.createElement(
-                    'label',
-                    { className: 'control-label' },
-                    'Ordering'
-                ),
-                React.createElement('br', null),
-                React.createElement(
-                    'button',
-                    { type: 'button', className: 'btn btn-danger',
-                      onClick: resetOrdering },
-                    ' Reset'
-                )
-            )
-        )
+      'tr',
+      null,
+      row.columns.map(column => column.visibility ? React.createElement(
+        'td',
+        { colSpan: '2' },
+        row.getValue(column)
+      ) : null)
     );
   }
 }
-
 class TableView extends React.Component {
   constructor(props) {
     super(props);
+    this.bootstrapped = false;
+  }
+
+  columnMoveHandler(side, columnName) {
+    this.setState({
+      td: this.state.td.reorderColumn(side, columnName)
+    });
+  }
+
+  columnMoveReset() {
+    this.setState({ td: this.state.td.resetColumnOrdering() });
+  }
+
+  handlePageSet(pageNum) {
+    this.setState({ td: this.state.td.setCurrentPage(pageNum) });
   }
 
   filterHandler(expression) {
@@ -1607,36 +1765,45 @@ class TableView extends React.Component {
   }
 
   columnsVisibilityHandler(column, value) {
-    this.setState({ td: this.state.td.setColumnVisibility(column, value) });
-  }
-
-  columnOrderingHandler(columnName, order) {
-    this.setState({ td: this.state.td.setOrdering(columnName, order) });
-  }
-
-  resetOrdering() {
-    this.setState({ td: this.state.td.setOrdering(null, null) });
-  }
-
-  bootstrapTable(data, filterQueryExporter, filterQuery) {
     this.setState({
-      td: new Table(data.columns, data.rows, filterQueryExporter, filterQuery)
+      td: this.state.td.setColumnVisibility(column, value)
     });
   }
-
-  updateTable(data) {
-    this.setState({ td: this.state.td.updateRows(data.rows) });
+  columnOrderingHandler(columnName, order) {
+    this.setState({
+      td: this.state.td.setOrdering(columnName, order)
+    });
   }
-
+  resetOrdering() {
+    this.setState({
+      td: this.state.td.setOrdering(null, null)
+    });
+  }
+  bootstrapTable(data, filterQueryExporter, filterQuery, pageSize) {
+    this.bootstrapped = true;
+    this.setState({
+      td: new Table(data.columns, data.rows, filterQueryExporter, filterQuery, pageSize)
+    });
+  }
+  updateTable(data) {
+    this.setState({
+      td: this.state.td.updateRows(data.rows)
+    });
+  }
   componentWillMount() {
     this.setState({ td: Table.empty() });
   }
-
   componentDidMount() {
-    let { socket, eventName, filterQueryExporter = expression => expression, filterQuery = "" } = this.props;
+    let {
+      socket,
+      eventName,
+      filterQueryExporter = expression => expression,
+      filterQuery = "",
+      pageSize = 50
+    } = this.props;
     socket.on(eventName, data => {
-      if (data && data.columns && data.rows) {
-        this.bootstrapTable(data, filterQueryExporter, filterQuery);
+      if (data && data.columns && data.rows && !this.bootstrapped) {
+        this.bootstrapTable(data, filterQueryExporter, filterQuery, pageSize);
       } else if (data && data.rows) {
         this.updateTable(data);
       }
@@ -1644,40 +1811,39 @@ class TableView extends React.Component {
   }
 
   render() {
-
     let { td: table } = this.state;
-
     if (table.columns.length > 0) {
       return React.createElement(
-          'div',
-          { className: 'container-fluid' },
-          React.createElement(FilterView, {
-            table: table,
-            filterHandler: expr => this.filterHandler(expr),
-            columnsVisibilityHandler: (column, value) => this.columnsVisibilityHandler(column, value),
-            resetOrdering: () => this.resetOrdering()
-          }),
+        'div',
+        { className: 'container-fluid' },
+        React.createElement(FilterView, {
+          table: table,
+          filterHandler: expr => this.filterHandler(expr),
+          columnsVisibilityHandler: (column, value) => this.columnsVisibilityHandler(column, value),
+          resetOrdering: () => this.resetOrdering(),
+          resetColumnOrdering: () => this.columnMoveReset() }),
+        React.createElement(PaginationView, { table: table, handlePageSet: pageNum => this.handlePageSet(pageNum) }),
+        React.createElement(
+          'table',
+          { className: 'table table-responsive table-bordered' },
+          React.createElement(Header, {
+            columnMoveHandler: (s, c) => {
+              this.columnMoveHandler(s, c);
+            },
+            columns: table.columns,
+            visibleColumns: table.columns.filter(col => col.visibility),
+            columnOrderingHandler: (columnName, order) => this.columnOrderingHandler(columnName, order),
+            orderingColumn: table.ordering.column }),
           React.createElement(
-              'table',
-              { className: 'table table-responsive table-bordered' },
-              React.createElement(Header, {
-                columns: table.columns,
-                visibleColumns: table.columns.filter(col => col.visibility),
-                columnOrderingHandler: (columnName, order) => this.columnOrderingHandler(columnName, order),
-                orderingColumn: table.ordering.column
-              }),
-              React.createElement(
-                  'tbody',
-                  null,
-                  table.exportRows().map(row => React.createElement(RowView, {
-                    key: row.key,
-                    row: row }))
-              )
+            'tbody',
+            null,
+            table.exportRows().map(row => React.createElement(RowView, { key: row.key, row: row }))
           )
+        ),
+        React.createElement(PaginationView, { table: table, handlePageSet: pageNum => this.handlePageSet(pageNum) })
       );
     }
     return null;
   }
 }
-
 export default TableView;

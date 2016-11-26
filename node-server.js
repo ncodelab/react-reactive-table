@@ -64,7 +64,7 @@ var columns = [
 ];
 
 var intervalMin = 1;
-var intervalMax = 50;
+var intervalMax = 147;
 
 var randomRow = function(key) {
   return createRow(key, columns.map(function (column) {
@@ -128,7 +128,9 @@ io.on('connection', function (client) {
   console.log('client');
   setTimeout(function () {
     client.emit('event', data);
-
+    // setTimeout(function() {
+      // client.emit('event', {columns:['a','b','c','d']})
+    // }, 2000);
     // setTimeout(function () {
     //   sender(client);
     // }, 500);

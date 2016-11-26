@@ -127,34 +127,38 @@ class Header extends React.Component {
 
   render() {
 
-    let {columns, columnOrderingHandler, orderingColumn}= this.props;
+    let {columns, columnOrderingHandler, orderingColumn, columnMoveHandler}= this.props;
     let {columnsWidth} = this.state;
 
     return (
         <thead>
         <tr>
-          {columns.map((column, idx) => {
-            if (column.visibility) {
-              const notLast = idx < (columns.length - 1);
+          {columns.filter(column => column.visibility).map((column, idx, collection) => {
+
+              const notLast = idx < (collection.length - 1);
+              const last = idx === collection.length;
+              const first = idx === 0
 
               let result = [
                 <ColumnView
                     column={column}
                     orderedByColumn={orderingColumn}
                     notLast={notLast}
+                    last={last}
+                    first={first}
                     width={columnsWidth[column.name]}
                     order={this.state.order}
+                    columnMoveHandler={columnMoveHandler}
                     columnOrderingHandler={(columnName) => columnOrderingHandler(columnName, this.toggleOrdering(columnName))}/>
               ];
 
               if (notLast) {
                 result.push(<ColumnResizerView
-                    handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, columns[idx + 1].name)}
+                    handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)}
                 />)
               }
 
               return (result);
-            }
           })}
         </tr>
         </thead>

@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
 
-const parser = (function() {
+export const parser = (function() {
   "use strict";
 
   function peg$subclass(child, parent) {
@@ -26,35 +26,35 @@ const parser = (function() {
 
   peg$SyntaxError.buildMessage = function(expected, found) {
     var DESCRIBE_EXPECTATION_FNS = {
-      literal: function(expectation) {
-        return "\"" + literalEscape(expectation.text) + "\"";
-      },
+          literal: function(expectation) {
+            return "\"" + literalEscape(expectation.text) + "\"";
+          },
 
-      "class": function(expectation) {
-        var escapedParts = "",
-            i;
+          "class": function(expectation) {
+            var escapedParts = "",
+                i;
 
-        for (i = 0; i < expectation.parts.length; i++) {
-          escapedParts += expectation.parts[i] instanceof Array
-              ? classEscape(expectation.parts[i][0]) + "-" + classEscape(expectation.parts[i][1])
-              : classEscape(expectation.parts[i]);
-        }
+            for (i = 0; i < expectation.parts.length; i++) {
+              escapedParts += expectation.parts[i] instanceof Array
+                ? classEscape(expectation.parts[i][0]) + "-" + classEscape(expectation.parts[i][1])
+                : classEscape(expectation.parts[i]);
+            }
 
-        return "[" + (expectation.inverted ? "^" : "") + escapedParts + "]";
-      },
+            return "[" + (expectation.inverted ? "^" : "") + escapedParts + "]";
+          },
 
-      any: function(expectation) {
-        return "any character";
-      },
+          any: function(expectation) {
+            return "any character";
+          },
 
-      end: function(expectation) {
-        return "end of input";
-      },
+          end: function(expectation) {
+            return "end of input";
+          },
 
-      other: function(expectation) {
-        return expectation.description;
-      }
-    };
+          other: function(expectation) {
+            return expectation.description;
+          }
+        };
 
     function hex(ch) {
       return ch.charCodeAt(0).toString(16).toUpperCase();
@@ -62,28 +62,28 @@ const parser = (function() {
 
     function literalEscape(s) {
       return s
-          .replace(/\\/g, '\\\\')
-          .replace(/"/g,  '\\"')
-          .replace(/\0/g, '\\0')
-          .replace(/\t/g, '\\t')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g,  '\\"')
+        .replace(/\0/g, '\\0')
+        .replace(/\t/g, '\\t')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
+        .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
     }
 
     function classEscape(s) {
       return s
-          .replace(/\\/g, '\\\\')
-          .replace(/\]/g, '\\]')
-          .replace(/\^/g, '\\^')
-          .replace(/-/g,  '\\-')
-          .replace(/\0/g, '\\0')
-          .replace(/\t/g, '\\t')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
+        .replace(/\\/g, '\\\\')
+        .replace(/\]/g, '\\]')
+        .replace(/\^/g, '\\^')
+        .replace(/-/g,  '\\-')
+        .replace(/\0/g, '\\0')
+        .replace(/\t/g, '\\t')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
+        .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
     }
 
     function describeExpectation(expectation) {
@@ -119,8 +119,8 @@ const parser = (function() {
 
         default:
           return descriptions.slice(0, -1).join(", ")
-              + ", or "
-              + descriptions[descriptions.length - 1];
+            + ", or "
+            + descriptions[descriptions.length - 1];
       }
     }
 
@@ -144,14 +144,14 @@ const parser = (function() {
         peg$c2 = "||",
         peg$c3 = peg$literalExpectation("||", false),
         peg$c4 = function(head, tail) {
-          return tail.reduce(function(result, element) {
-            return {
-              'l': result,
-              'r': element[3],
-              'op': element[1]
-            }
-          }, head);
-        },
+              return tail.reduce(function(result, element) {
+                  return {
+                  	'l': result,
+                    'r': element[3],
+                    'op': element[1]
+                  }
+              }, head);
+            },
         peg$c5 = "<=",
         peg$c6 = peg$literalExpectation("<=", false),
         peg$c7 = "<",
@@ -171,14 +171,14 @@ const parser = (function() {
         peg$c21 = "{",
         peg$c22 = peg$literalExpectation("{", false),
         peg$c23 = function(head, tail) {
-          return tail.reduce(function(result, element) {
-            return {
-              'col': result[1],
-              'act': element[1],
-              'exp': element[3]
-            }
-          }, head);
-        },
+              return tail.reduce(function(result, element) {
+                 return {
+                   'col': result[1],
+                   'act': element[1],
+                   'exp': element[3]
+                 }
+              }, head);
+            },
         peg$c24 = function(chars) {return chars.join("");},
         peg$c25 = /^[a-zA-Z0-9]/,
         peg$c26 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"]], false, false),
@@ -216,9 +216,9 @@ const parser = (function() {
       location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos)
 
       throw peg$buildStructuredError(
-          [peg$otherExpectation(description)],
-          input.substring(peg$savedPos, peg$currPos),
-          location
+        [peg$otherExpectation(description)],
+        input.substring(peg$savedPos, peg$currPos),
+        location
       );
     }
 
@@ -316,10 +316,10 @@ const parser = (function() {
 
     function peg$buildStructuredError(expected, found, location) {
       return new peg$SyntaxError(
-          peg$SyntaxError.buildMessage(expected, found),
-          expected,
-          found,
-          location
+        peg$SyntaxError.buildMessage(expected, found),
+        expected,
+        found,
+        location
       );
     }
 
@@ -787,11 +787,11 @@ const parser = (function() {
       }
 
       throw peg$buildStructuredError(
-          peg$maxFailExpected,
-          peg$maxFailPos < input.length ? input.charAt(peg$maxFailPos) : null,
-          peg$maxFailPos < input.length
-              ? peg$computeLocation(peg$maxFailPos, peg$maxFailPos + 1)
-              : peg$computeLocation(peg$maxFailPos, peg$maxFailPos)
+        peg$maxFailExpected,
+        peg$maxFailPos < input.length ? input.charAt(peg$maxFailPos) : null,
+        peg$maxFailPos < input.length
+          ? peg$computeLocation(peg$maxFailPos, peg$maxFailPos + 1)
+          : peg$computeLocation(peg$maxFailPos, peg$maxFailPos)
       );
     }
   }
@@ -818,7 +818,6 @@ class Column {
   }
 
 }
-
 
 class Filter {
 
@@ -977,7 +976,6 @@ class Filter {
     });
   };
 }
-
 class Row {
   /**
    * @param key {String}
@@ -1029,14 +1027,14 @@ class Row {
   }
 }
 
-
 class Table {
-  constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap) {
+  constructor(columnNames, rows, exportLastFilterQuery, filterQueryForBootstrap, pageSize) {
     /**
      * @type {{String, Row}}
      */
     this.rows = {};
 
+    this.initialColumnOrder = [];
     /**
      * @type {Array<Column>}
      */
@@ -1045,6 +1043,8 @@ class Table {
     columnNames.forEach(columnName => {
       this.columns.push(new Column(columnName));
     });
+
+    this.initialColumnOrder = this.columns.slice();
 
     rows.forEach((row) => {
       let rowClass = new Row(row.key, this.columns, row);
@@ -1056,7 +1056,52 @@ class Table {
       'order': true
     };
 
+    this.pageSize = pageSize;
+
+    this.currentPage = 1;
+
     this.filter = new Filter(this.columns, exportLastFilterQuery, filterQueryForBootstrap,);
+  }
+
+  getMaxPage() {
+    return Math.ceil(Object.keys(this.exportFilteredRows(this.getRowsArray())).length / this.pageSize);
+  }
+
+  resetColumnOrdering() {
+    while (this.columns.pop() != undefined) {
+      this.columns.pop();
+    }
+
+    this.initialColumnOrder.forEach((column, idx) => {
+      this.columns[idx] = column;
+    });
+    return this;
+  }
+
+  reorderColumn(side, columnName) {
+
+    for (let idx = 0; idx < this.columns.length; idx++) {
+      if (this.columns[idx].name === columnName) {
+        if (side === moveSide.RIGHT) {
+          const buff = this.columns[idx + 1];
+          this.columns[idx + 1] = this.columns[idx];
+          this.columns[idx] = buff;
+          break;
+        } else if (side === moveSide.LEFT) {
+          const buff = this.columns[idx - 1];
+          this.columns[idx - 1] = this.columns[idx];
+          this.columns[idx] = buff;
+          break;
+        }
+      }
+    }
+
+    return this;
+  }
+
+  setCurrentPage(pageNum) {
+    this.currentPage = pageNum;
+    return this;
   }
 
   /**
@@ -1120,14 +1165,17 @@ class Table {
     return this.filter.filterRow(rows);
   }
 
+  getRowsArray() {
+    return Object.keys(this.rows).map((rowKey) => this.rows[rowKey]);
+  }
+
   /**
    * @returns Array.<Row>
    */
   exportRows() {
-    let rowsArray = Object.keys(this.rows)
-        .map((rowKey) => this.rows[rowKey]);
+    let orderedRows = this.exportOrderedRows(this.exportFilteredRows(this.getRowsArray()));
 
-    return this.exportOrderedRows(this.exportFilteredRows(rowsArray));
+    return orderedRows.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize)
   }
 
   setOrdering(columnName, order) {
@@ -1137,12 +1185,13 @@ class Table {
   }
 
   setFilterExpression(expression) {
+    this.setCurrentPage(1);
     this.filter.setExpression(expression);
     return this;
   }
 
   static empty() {
-    return new Table([], [], (expression)=> expression, "");
+    return new Table([], [], (expression) => expression, "");
   }
 
   getFilterExpression() {
@@ -1154,7 +1203,6 @@ class Table {
   }
 
 }
-
 
 const DEFAULT_LEFT = '8px';
 
@@ -1233,7 +1281,6 @@ class ColumnResizerView extends React.Component {
 }
 
 
-
 class ColumnsVisibility extends React.Component {
   constructor(props) {
     super(props);
@@ -1263,13 +1310,14 @@ class ColumnsVisibility extends React.Component {
     )
   }
 }
-
-
+export const moveSide = {
+  RIGHT: 'right',
+  LEFT: 'left'
+}
 class ColumnView extends React.Component {
   constructor(props) {
     super(props);
   }
-
   orderingIconClass(columnName, orderingColumnName) {
     if (orderingColumnName !== columnName) {
       return "glyphicon glyphicon-sort";
@@ -1281,42 +1329,91 @@ class ColumnView extends React.Component {
       return "glyphicon glyphicon-sort";
     }
   }
-
   render() {
-
-
     let {
-        column,
-        orderedByColumn,
-        columnOrderingHandler,
-        notLast,
-        width
+      column,
+      orderedByColumn,
+      columnOrderingHandler,
+      notLast,
+      width,
+      first,
+      last,
+      columnMoveHandler
     } = this.props;
 
     const style = {};
-
     if (notLast) {
       style['borderRight'] = '0px';
     } else {
       style['borderRight'] = undefined;
     }
-
     if (width) {
       style['width'] = width + 'px'
     }
-
-    return (<th key={column.name}
-                style={style}
-                className={column.inFilterExpression ? "active" : "" }>
-              <span
-                  className={this.orderingIconClass(column.name, orderedByColumn)}
-                  onClick={() => columnOrderingHandler(column.name)}/>
-      &nbsp;{column.name}
-
-    </th>);
+    return (
+      <th key={column.name} style={style} className={column.inFilterExpression
+        ? "active"
+        : ""}>
+        {!first
+          ? <span className="glyphicon glyphicon-arrow-left" onClick={() => columnMoveHandler(moveSide.LEFT, column.name)}/>
+          : null}
+        &nbsp;
+        <span className={this.orderingIconClass(column.name, orderedByColumn)} onClick={() => columnOrderingHandler(column.name)}/>
+        &nbsp;{column.name} {!last && notLast
+          ? <span style={{
+              float: 'right',
+              marginRight: '-15px',
+              marginTop: '1px'
+            }} className="glyphicon glyphicon-arrow-right" onClick={() => columnMoveHandler(moveSide.RIGHT, column.name)}/>
+          : null}
+      </th>
+    );
   };
 }
-
+class FilterView extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    let {table, filterHandler, columnsVisibilityHandler, resetOrdering, resetColumnOrdering} = this.props;
+    return (
+      <div className="panel-group" id="table-filtering-accordion" role="tablist" aria-multiselectable="true">
+        <div className="panel panel-default">
+          <div className="panel-heading" role="tab" id="headingFiltering">
+            <a className="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFiltering" aria-expanded="false" aria-controls="collapseFiltering">
+              <h4 className="panel-title">
+               Table Filtering
+              </h4>
+            </a>
+          </div>
+          <div id="collapseFiltering" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFiltering">
+            <div className="panel-body">
+              <QueryInput onChange={filterHandler} query={table.getFilterExpression()} error={table.getFilterError()}/>
+              <ColumnsVisibility columns={table.columns} onChange={columnsVisibilityHandler}/>
+              <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+                <label className="control-label">Reset</label>
+                <br/>
+                <div className="row">
+                  <div className="col-sm-1 col-md-1 col-lg-1 col-xs-1">
+                    <button type="button" className="btn btn-danger" onClick={resetOrdering}>
+                      Ordering by value
+                    </button>
+                  </div>
+                  <div className="col-sm-1 col-md-1 col-lg-1 col-xs-1"></div>
+                  <div className="col-sm-1 col-md-1 col-lg-1 col-xs-1">
+                    <button type="button" className="btn btn-danger" onClick={resetColumnOrdering}>
+                      Column position
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
 
 class Header extends React.Component {
   constructor(props) {
@@ -1393,7 +1490,7 @@ class Header extends React.Component {
   }
 
 
-  populateColumns(columns) {
+  populateColumns(columns, silent) {
     const width = ReactDOM.findDOMNode(this).getBoundingClientRect().width;
     const columnWidth = Math.floor(width / columns.length);
 
@@ -1403,7 +1500,10 @@ class Header extends React.Component {
       state[column.name] = columnWidth;
     });
 
-    this.setState({columnsWidth: state});
+    if (!silent) {
+      this.setState({columnsWidth: state});
+    }
+    return state;
   }
 
   initState() {
@@ -1439,67 +1539,89 @@ class Header extends React.Component {
 
   render() {
 
-    let {columns, columnOrderingHandler, orderingColumn}= this.props;
+    let {columns, columnOrderingHandler, orderingColumn, columnMoveHandler}= this.props;
     let {columnsWidth} = this.state;
 
     return (
         <thead>
         <tr>
-          {columns.map((column, idx) => {
-            if (column.visibility) {
-              const notLast = idx < (columns.length - 1);
+          {columns.filter(column => column.visibility).map((column, idx, collection) => {
+
+              const notLast = idx < (collection.length - 1);
+              const last = idx === collection.length;
+              const first = idx === 0
 
               let result = [
                 <ColumnView
                     column={column}
                     orderedByColumn={orderingColumn}
                     notLast={notLast}
+                    last={last}
+                    first={first}
                     width={columnsWidth[column.name]}
                     order={this.state.order}
+                    columnMoveHandler={columnMoveHandler}
                     columnOrderingHandler={(columnName) => columnOrderingHandler(columnName, this.toggleOrdering(columnName))}/>
               ];
 
               if (notLast) {
                 result.push(<ColumnResizerView
-                    handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, columns[idx + 1].name)}
+                    handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)}
                 />)
               }
 
               return (result);
-            }
           })}
         </tr>
         </thead>
     )
   };
 }
-
-
-
-
-class RowView extends React.Component {
+class PaginationView extends React.Component {
   constructor(props) {
     super(props);
   }
 
+  renderPageCounter(table, handlePageSet) {
+    let pages = []
+    for (let counter = 1; counter < (table.getMaxPage() + 1); counter++) {
+      pages.push((
+        <li key={counter} className={counter === table.currentPage
+          ? 'active'
+          : ''}>
+          <a onClick={() => handlePageSet(counter)}>{counter}
+            <span className="sr-only"></span>
+          </a>
+        </li>
+      ))
+    }
+    return pages;
+  }
   render() {
-
-    /**
-     * @type {Row}
-     */
-    let row = this.props.row;
-
-
+    let {table, handlePageSet} = this.props;
     return (
-        <tr>
-          {row.columns.map(column => column.visibility ?
-              <td colSpan="2">{row.getValue(column)}</td> : null)}
-        </tr>
+      <nav aria-label="...">
+        <ul className="pagination">
+          <li className={table.currentPage === 1
+            ? 'disabled'
+            : ''}>
+            <a aria-label="Previous" onClick={() => handlePageSet(1)}>
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          {this.renderPageCounter(table, handlePageSet)}
+          <li className={table.currentPage === table.getMaxPage()
+            ? 'disabled'
+            : ''}>
+            <a aria-label="Next" onClick={() => handlePageSet(table.getMaxPage())}>
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     )
   };
 }
-
-
 class QueryInput extends React.Component {
   constructor(props) {
     super(props);
@@ -1521,61 +1643,58 @@ class QueryInput extends React.Component {
     let hasError = !!error;
 
     return (
-        <div className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
-          <label htmlFor='tableViewFilterQuery'>Filter Query</label>
-          <input
-              id='tableViewFilterQuery'
-              type='text'
-              className='form-control'
-              onChange={(evt) => onChange(evt.target.value)}
-              value={query}/>
-        </div>
+      <div
+        className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
+        <label htmlFor='tableViewFilterQuery'>Filter Query</label>
+        <input
+          id='tableViewFilterQuery'
+          type='text'
+          className='form-control'
+          onChange={(evt) => onChange(evt.target.value)}
+          value={query}/>
+      </div>
     )
   }
 }
-
-
-
-class FilterView extends React.Component {
+class RowView extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
 
-    let {table, filterHandler, columnsVisibilityHandler, resetOrdering} = this.props;
+    /**
+     * @type {Row}
+     */
+    let row = this.props.row;
+
 
     return (
-        <div className="panel panel-default">
-          <div className="panel-heading">
-            <h3 className="panel-title">Table filtering</h3>
-          </div>
-
-          <div className="panel-body">
-
-            <QueryInput onChange={filterHandler}
-                        query={table.getFilterExpression()}
-                        error={table.getFilterError()}/>
-
-            <ColumnsVisibility columns={table.columns}
-                               onChange={columnsVisibilityHandler}/>
-
-            <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
-              <label className="control-label">Ordering</label>
-              <br/>
-              <button type="button" className="btn btn-danger"
-                      onClick={resetOrdering}> Reset
-              </button>
-            </div>
-          </div>
-        </div>
+        <tr>
+          {row.columns.map(column => column.visibility ?
+              <td colSpan="2">{row.getValue(column)}</td> : null)}
+        </tr>
     )
-  }
+  };
 }
-
 class TableView extends React.Component {
   constructor(props) {
     super(props);
+    this.bootstrapped = false;
+  }
+
+  columnMoveHandler(side, columnName) {
+    this.setState({
+      td: this.state.td.reorderColumn(side, columnName)
+    })
+  }
+
+  columnMoveReset() {
+    this.setState({td: this.state.td.resetColumnOrdering()})
+  }
+
+  handlePageSet(pageNum) {
+    this.setState({td: this.state.td.setCurrentPage(pageNum)})
   }
 
   filterHandler(expression) {
@@ -1583,80 +1702,81 @@ class TableView extends React.Component {
   }
 
   columnsVisibilityHandler(column, value) {
-    this.setState({td: this.state.td.setColumnVisibility(column, value)});
-  }
-
-  columnOrderingHandler(columnName, order) {
-    this.setState({td: this.state.td.setOrdering(columnName, order)});
-  }
-
-  resetOrdering() {
-    this.setState({td: this.state.td.setOrdering(null, null)});
-  }
-
-  bootstrapTable(data, filterQueryExporter, filterQuery) {
     this.setState({
-      td: new Table(
-          data.columns,
-          data.rows,
-          filterQueryExporter,
-          filterQuery)
+      td: this.state.td.setColumnVisibility(column, value)
     });
   }
-
-  updateTable(data) {
-    this.setState({td: this.state.td.updateRows(data.rows)});
+  columnOrderingHandler(columnName, order) {
+    this.setState({
+      td: this.state.td.setOrdering(columnName, order)
+    });
   }
-
+  resetOrdering() {
+    this.setState({
+      td: this.state.td.setOrdering(null, null)
+    });
+  }
+  bootstrapTable(data, filterQueryExporter, filterQuery, pageSize) {
+    this.bootstrapped = true;
+    this.setState({
+      td: new Table(data.columns, data.rows, filterQueryExporter, filterQuery, pageSize)
+    });
+  }
+  updateTable(data) {
+    this.setState({
+      td: this.state.td.updateRows(data.rows)
+    });
+  }
   componentWillMount() {
     this.setState({td: Table.empty()});
   }
-
   componentDidMount() {
-    let {socket, eventName, filterQueryExporter = (expression)=> expression, filterQuery = ""} = this.props;
+    let {
+      socket,
+      eventName,
+      filterQueryExporter = (expression) => expression,
+      filterQuery = "",
+      pageSize = 50
+    } = this.props;
     socket.on(eventName, (data) => {
-      if (data && data.columns && data.rows) {
-        this.bootstrapTable(data, filterQueryExporter, filterQuery);
+      if (data && data.columns && data.rows && !this.bootstrapped) {
+        this.bootstrapTable(data, filterQueryExporter, filterQuery, pageSize);
       } else if (data && data.rows) {
         this.updateTable(data);
       }
     })
   }
 
-
   render() {
-
     let {td: table} = this.state;
-
     if (table.columns.length > 0) {
       return (
-          <div className="container-fluid">
-
-            <FilterView
-                table={table}
-                filterHandler={(expr) => this.filterHandler(expr)}
-                columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
-                resetOrdering={() => this.resetOrdering()}
-            />
-            <table className="table table-responsive table-bordered">
-              <Header
-                  columns={table.columns}
-                  visibleColumns={table.columns.filter(col => col.visibility)}
-                  columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
-                  orderingColumn={table.ordering.column}
-              />
-
-              <tbody>
-              {table.exportRows().map(row => <RowView
-                  key={row.key}
-                  row={row}/>)}
-              </tbody>
-            </table>
-          </div>
+        <div className="container-fluid">
+          <FilterView
+            table={table}
+            filterHandler={(expr) => this.filterHandler(expr)}
+            columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
+            resetOrdering={() => this.resetOrdering()}
+            resetColumnOrdering={() => this.columnMoveReset()}/>
+          <PaginationView table={table} handlePageSet={(pageNum) => this.handlePageSet(pageNum)}/>
+          <table className="table table-responsive table-bordered">
+            <Header
+              columnMoveHandler={(s, c) => {
+              this.columnMoveHandler(s, c)
+            }}
+              columns={table.columns}
+              visibleColumns={table.columns.filter(col => col.visibility)}
+              columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
+              orderingColumn={table.ordering.column}/>
+            <tbody>
+              {table.exportRows().map(row => <RowView key={row.key} row={row}/>)}
+            </tbody>
+          </table>
+          <PaginationView table={table} handlePageSet={(pageNum) => this.handlePageSet(pageNum)}/>
+        </div>
       )
     }
     return (null);
   };
 }
-
 export default TableView;
