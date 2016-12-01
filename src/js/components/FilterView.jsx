@@ -1,6 +1,7 @@
 import React from 'react';
 import QueryInput from './QueryInput.jsx'
 import ColumnsVisibility from './ColumnsVisibility.jsx'
+
 class FilterView extends React.Component {
   constructor(props) {
     super(props);
@@ -24,9 +25,11 @@ class FilterView extends React.Component {
             <div id="collapseFiltering" className="panel-collapse collapse"
                  role="tabpanel" aria-labelledby="headingFiltering">
               <div className="panel-body">
-                <QueryInput onChange={filterHandler}
+                <QueryInput table={table}
+                            onChange={filterHandler}
                             query={table.getFilterExpression()}
                             error={table.getFilterError()}/>
+
                 <ColumnsVisibility columns={table.columns}
                                    onChange={columnsVisibilityHandler}/>
                 <div

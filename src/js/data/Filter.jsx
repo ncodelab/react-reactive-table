@@ -1,4 +1,6 @@
 import {parser} from '../parser.jsx';
+import {copyObject} from './Util.jsx';
+import {step} from '../components/SimpleQueryInput.jsx';
 
 class Filter {
 
@@ -15,7 +17,6 @@ class Filter {
     this.__availableColumns = availableColumns;
 
     this.__lastSuccessfullExpression = '';
-
 
     /**
      * @type {Object<string,function(string, string): Boolean>}
@@ -40,10 +41,18 @@ class Filter {
      * @type {Object<string,function(string, string): Boolean>}
      */
     this.__SEARCH_SYNTAX = {
-      '<': (value, expectation) => value < expectation,
-      '<=': (value, expectation) => value <= expectation,
-      '>': (value, expectation) => value > expectation,
-      '>=': (value, expectation) => value >= expectation,
+      '<': (value, expectation) => {
+       return  parseFloat(value) < parseFloat(expectation)
+      },
+      '<=': (value, expectation) => {
+        return  parseFloat(value) <= parseFloat(expectation)
+      },
+      '>': (value, expectation) => {
+        return  parseFloat(value) > parseFloat(expectation)
+      },
+      '>=': (value, expectation) => {
+        return  parseFloat(value) >= parseFloat(expectation)
+      },
       '=': (value, expectation) => {
         return value == expectation
       },
@@ -94,10 +103,10 @@ class Filter {
 
   __parseExpression(expression) {
     this.lastError = '';
-    var lastExpression = this.__parsedExpression;
+    let lastExpression = copyObject(this.__parsedExpression);
     if (expression.length > 0) {
       try {
-        this.__parsedExpression = parser.parse(expression, {'startRule': 'Query'});
+        this.__parsedExpression = parser.parse(expression);
       } catch (e) {
         this.lastError = e.message;
       }
@@ -105,7 +114,7 @@ class Filter {
       this.__parsedExpression = undefined;
     }
 
-    if (JSON.stringify(this.__parsedExpression) !== JSON.stringify(lastExpression)) {
+    if (JSON.stringify(copyObject(this.__parsedExpression)) !== JSON.stringify(lastExpression)) {
       this.__lastSuccessfullExpression = expression;
       this.__parseWasOk(this.__lastSuccessfullExpression);
       this.__markColumns(expression);
@@ -129,14 +138,17 @@ class Filter {
     return expression['l'] && expression['r'] && expression['op'];
   }
 
+
   __reduceTerm(rows, term) {
     let {col: columnName, act: action, exp: expectation} = term;
     return rows.filter((row) => {
       let value = row.getValueByColumnName(columnName);
+      let valueAsFloat = parseFloat(value);
+      let expectationAsFloat = parseFloat(expectation);
       if (value) {
         return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
       }
-      return true;
+      return false;
     });
   }
 
@@ -148,7 +160,7 @@ class Filter {
       if (firstValue && secondValue) {
         return this.__SEARCH_SYNTAX[action](firstValue.toString(), secondValue.toString())
       }
-      return true;
+      return false;
     })
   }
 
@@ -156,13 +168,8 @@ class Filter {
     let {col: columnName, check} = term;
     return rows.filter((row) => {
       let value = row.getValueByColumnName(columnName);
-      if (value) {
-        return this.__CHECK_SYNTAX[check](value.toString());
-      }
-      return true;
+      return this.__CHECK_SYNTAX[check](value.toString());
     })
-
-
   }
 
   __reduceExpression(expression) {
@@ -183,7 +190,6 @@ class Filter {
     if (Filter.__isInterColumnTermValid(tree)) {
       return this.__reduceInterColumnTerm(rows, tree);
     }
-
     if (Filter.__isNonArgumentedTermValid(tree)) {
       return this.__reduceNonArgumentedTerm(rows, tree);
     }
@@ -192,7 +198,7 @@ class Filter {
 
   filterRow(rows) {
     if (this.__parsedExpression) {
-      return this.__reduceTree(rows, Object.assign({}, this.__parsedExpression));
+      return this.__reduceTree(rows, copyObject(this.__parsedExpression));
     } else {
       return rows;
     }
@@ -209,5 +215,57 @@ class Filter {
     });
   };
 }
+
+
+
+
+export const reduceAstToState = (ast) => {
+  if (Filter.__isExpressionValid(ast)) {
+    ast['l'] = reduceAstToState(ast['l']);
+    ast['r'] = reduceAstToState(ast['r']);
+    return __reduceExpression(ast);
+  }
+  if (Filter.__isTermValid(ast)) {
+    return __reduceTerm(ast);
+  }
+  if (Filter.__isInterColumnTermValid(ast)) {
+    return __reduceInterColumnTerm(ast);
+  }
+  if (Filter.__isNonArgumentedTermValid(ast)) {
+    return __reduceNonArgumentedTerm(ast);
+  }
+};
+
+const __reduceExpression = (ast) => {
+  return {
+    items: [...ast.l.items, ast.op, ...ast.r.items],
+    steps: [...ast.l.steps, step.LOGIC, ...ast.r.steps]
+  }
+};
+
+
+const __reduceTerm = (ast) => {
+  return {
+    items: ['"' + ast.col + '"', ast.act, ast.exp],
+    steps: [step.COLUMN, step.ACTION, step.VALUE]
+  }
+};
+
+
+const __reduceInterColumnTerm = (ast) => {
+  return {
+    items: ['"' + ast.col1 + '"', ast.act, '"' + ast.col2 + '"'],
+    steps: [step.COLUMN, step.ACTION, step.VALUE]
+  }
+};
+
+
+const __reduceNonArgumentedTerm = (ast) => {
+  return {
+    items: ['"' + ast.col + '"', ast.check],
+    steps: [step.COLUMN, step.ACTION]
+  }
+};
+
 
 export default Filter;

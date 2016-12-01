@@ -22,7 +22,7 @@ Where
 
 
 ##Filtering
-You could use syntax from [TableFilter](https://github.com/koalyptus/TableFilter/wiki/4.-Filter-operators) without `[empty]`, `[nonempty]` and `:rgx`
+You could use syntax from [TableFilter](https://github.com/koalyptus/TableFilter/wiki/4.-Filter-operators) without `:rgx`
 
 ###Examples
 ```
@@ -31,6 +31,10 @@ You could use syntax from [TableFilter](https://github.com/koalyptus/TableFilter
 "Price" > 200
 "Weight" < 100
 "Name" { Alex
+
+"{ColumnName}" *Filter Operator* "{ColumnName}"
+
+"DiscountedPrice" = "Price"
 ```
 
 ##Chaining
@@ -38,7 +42,7 @@ Filter rules could be chained with `&&`  and `||`
 
 For example
 ```
-"{ColumnName}" *Filter Operator* {Value} *Logic Operator* "{ColumnName}" *Filter Operator* {Value}
+#FilteringExpression *Logic Operator* #FilteringExpression
 
 "Price" > 100 && "Price" < 300 //find all rows where price between 100 and 300
 

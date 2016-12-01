@@ -15,7 +15,7 @@ Term =  (NonParametrizedTerm / InterColumnTerm / SimpleTerm)
 
 NonParametrizedTerm
  = _ col: Column _ check:("[empty]" / "[nonempty]") _ {
- 	return {
+    return {
           'col': col,
           'check': check
         }
@@ -38,9 +38,9 @@ SimpleTerm
            'exp': exp
          }
     }
-    
+
 LogicAction = ("&&" / "||")
-    
+
 SearchAction = ( "<=" / "<" / ">=" / ">" / "=" / "*" / "!" / "}" / "{")
 
 Column = items:(Quote Word Quote) {return items[1];}

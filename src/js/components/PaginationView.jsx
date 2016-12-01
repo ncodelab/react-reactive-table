@@ -1,4 +1,6 @@
 import React from 'react'
+
+
 class PaginationView extends React.Component {
   constructor(props) {
     super(props);
@@ -20,15 +22,24 @@ class PaginationView extends React.Component {
     return pages;
   }
 
+  static makeClassLine(classes, showSelect) {
+    if (showSelect) {
+      return classes;
+    } else {
+      return classes + " hidden";
+    }
+  }
+
   render() {
     let {
         table,
         handlePageSet,
         setPageSize,
+        showSelect
     } = this.props;
     return (
         <div className="row">
-          <div className="col-sm-2 col-md-2 col-lg-2 col-xs-2">
+          <div className={PaginationView.makeClassLine("col-sm-2 col-md-2 col-lg-2 col-xs-2", showSelect)}>
             <div className="form-group">
               <label htmlFor="table-page-size-selec">Page size:</label>
               <select

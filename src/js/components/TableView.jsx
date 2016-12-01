@@ -4,6 +4,8 @@ import RowView from './RowView.jsx'
 import FilterView from './FilterView.jsx'
 import PaginationView from './PaginationView.jsx'
 import Table from '../data/Table.jsx';
+
+
 class TableView extends React.Component {
   constructor(props) {
     super(props);
@@ -96,9 +98,6 @@ class TableView extends React.Component {
                 columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
                 resetOrdering={() => this.resetOrdering()}
                 resetColumnOrdering={() => this.columnMoveReset()}/>
-            <PaginationView table={table}
-                            handlePageSet={(pageNum) => this.handlePageSet(pageNum)}
-                            setPageSize={(pageSize) => this.setPageSize(pageSize)}/>
             <table className="table table-responsive table-bordered">
               <Header
                   columnMoveHandler={(s, c) => {
@@ -114,6 +113,8 @@ class TableView extends React.Component {
               </tbody>
             </table>
             <PaginationView table={table}
+                            showSelect={true}
+                            setPageSize={(pageSize) => this.setPageSize(pageSize)}
                             handlePageSet={(pageNum) => this.handlePageSet(pageNum)}/>
           </div>
       )
@@ -121,4 +122,6 @@ class TableView extends React.Component {
     return (null);
   };
 }
+
+
 export default TableView;

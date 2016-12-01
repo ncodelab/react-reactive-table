@@ -1,7 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom';
 
-export const parser = (function () {
+
+const parser = (function () {
   "use strict";
 
   function peg$subclass(child, parent) {
@@ -892,6 +893,7 @@ export const parser = (function () {
   };
 })();
 
+
 class Column {
   constructor(name) {
     this.inFilterExpression = false;
@@ -926,7 +928,6 @@ class Filter {
 
     this.__lastSuccessfullExpression = '';
 
-
     /**
      * @type {Object<string,function(string, string): Boolean>}
      */
@@ -950,10 +951,18 @@ class Filter {
      * @type {Object<string,function(string, string): Boolean>}
      */
     this.__SEARCH_SYNTAX = {
-      '<': (value, expectation) => value < expectation,
-      '<=': (value, expectation) => value <= expectation,
-      '>': (value, expectation) => value > expectation,
-      '>=': (value, expectation) => value >= expectation,
+      '<': (value, expectation) => {
+        return parseFloat(value) < parseFloat(expectation)
+      },
+      '<=': (value, expectation) => {
+        return parseFloat(value) <= parseFloat(expectation)
+      },
+      '>': (value, expectation) => {
+        return parseFloat(value) > parseFloat(expectation)
+      },
+      '>=': (value, expectation) => {
+        return parseFloat(value) >= parseFloat(expectation)
+      },
       '=': (value, expectation) => {
         return value == expectation
       },
@@ -1004,10 +1013,10 @@ class Filter {
 
   __parseExpression(expression) {
     this.lastError = '';
-    var lastExpression = this.__parsedExpression;
+    let lastExpression = copyObject(this.__parsedExpression);
     if (expression.length > 0) {
       try {
-        this.__parsedExpression = parser.parse(expression, {'startRule': 'Query'});
+        this.__parsedExpression = parser.parse(expression);
       } catch (e) {
         this.lastError = e.message;
       }
@@ -1015,7 +1024,7 @@ class Filter {
       this.__parsedExpression = undefined;
     }
 
-    if (JSON.stringify(this.__parsedExpression) !== JSON.stringify(lastExpression)) {
+    if (JSON.stringify(copyObject(this.__parsedExpression)) !== JSON.stringify(lastExpression)) {
       this.__lastSuccessfullExpression = expression;
       this.__parseWasOk(this.__lastSuccessfullExpression);
       this.__markColumns(expression);
@@ -1039,14 +1048,17 @@ class Filter {
     return expression['l'] && expression['r'] && expression['op'];
   }
 
+
   __reduceTerm(rows, term) {
     let {col: columnName, act: action, exp: expectation} = term;
     return rows.filter((row) => {
       let value = row.getValueByColumnName(columnName);
+      let valueAsFloat = parseFloat(value);
+      let expectationAsFloat = parseFloat(expectation);
       if (value) {
         return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
       }
-      return true;
+      return false;
     });
   }
 
@@ -1058,7 +1070,7 @@ class Filter {
       if (firstValue && secondValue) {
         return this.__SEARCH_SYNTAX[action](firstValue.toString(), secondValue.toString())
       }
-      return true;
+      return false;
     })
   }
 
@@ -1066,13 +1078,8 @@ class Filter {
     let {col: columnName, check} = term;
     return rows.filter((row) => {
       let value = row.getValueByColumnName(columnName);
-      if (value) {
-        return this.__CHECK_SYNTAX[check](value.toString());
-      }
-      return true;
+      return this.__CHECK_SYNTAX[check](value.toString());
     })
-
-
   }
 
   __reduceExpression(expression) {
@@ -1093,7 +1100,6 @@ class Filter {
     if (Filter.__isInterColumnTermValid(tree)) {
       return this.__reduceInterColumnTerm(rows, tree);
     }
-
     if (Filter.__isNonArgumentedTermValid(tree)) {
       return this.__reduceNonArgumentedTerm(rows, tree);
     }
@@ -1102,7 +1108,7 @@ class Filter {
 
   filterRow(rows) {
     if (this.__parsedExpression) {
-      return this.__reduceTree(rows, Object.assign({}, this.__parsedExpression));
+      return this.__reduceTree(rows, copyObject(this.__parsedExpression));
     } else {
       return rows;
     }
@@ -1119,6 +1125,56 @@ class Filter {
     });
   };
 }
+
+
+export const reduceAstToState = (ast) => {
+  if (Filter.__isExpressionValid(ast)) {
+    ast['l'] = reduceAstToState(ast['l']);
+    ast['r'] = reduceAstToState(ast['r']);
+    return __reduceExpression(ast);
+  }
+  if (Filter.__isTermValid(ast)) {
+    return __reduceTerm(ast);
+  }
+  if (Filter.__isInterColumnTermValid(ast)) {
+    return __reduceInterColumnTerm(ast);
+  }
+  if (Filter.__isNonArgumentedTermValid(ast)) {
+    return __reduceNonArgumentedTerm(ast);
+  }
+};
+
+const __reduceExpression = (ast) => {
+  return {
+    items: [...ast.l.items, ast.op, ...ast.r.items],
+    steps: [...ast.l.steps, step.LOGIC, ...ast.r.steps]
+  }
+};
+
+
+const __reduceTerm = (ast) => {
+  return {
+    items: ['"' + ast.col + '"', ast.act, ast.exp],
+    steps: [step.COLUMN, step.ACTION, step.VALUE]
+  }
+};
+
+
+const __reduceInterColumnTerm = (ast) => {
+  return {
+    items: ['"' + ast.col1 + '"', ast.act, '"' + ast.col2 + '"'],
+    steps: [step.COLUMN, step.ACTION, step.VALUE]
+  }
+};
+
+
+const __reduceNonArgumentedTerm = (ast) => {
+  return {
+    items: ['"' + ast.col + '"', ast.check],
+    steps: [step.COLUMN, step.ACTION]
+  }
+};
+
 
 class Row {
   /**
@@ -1373,6 +1429,14 @@ class Table {
 
 }
 
+
+const copyObject = (obj) => {
+  if (obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+};
+
+
 const DEFAULT_LEFT = '8px';
 
 class ColumnResizerView extends React.Component {
@@ -1447,6 +1511,7 @@ class ColumnResizerView extends React.Component {
     </th>);
   };
 }
+
 
 class ColumnsVisibility extends React.Component {
   constructor(props) {
@@ -1567,9 +1632,11 @@ class FilterView extends React.Component {
             <div id="collapseFiltering" className="panel-collapse collapse"
                  role="tabpanel" aria-labelledby="headingFiltering">
               <div className="panel-body">
-                <QueryInput onChange={filterHandler}
+                <QueryInput table={table}
+                            onChange={filterHandler}
                             query={table.getFilterExpression()}
                             error={table.getFilterError()}/>
+
                 <ColumnsVisibility columns={table.columns}
                                    onChange={columnsVisibilityHandler}/>
                 <div
@@ -1786,15 +1853,25 @@ class PaginationView extends React.Component {
     return pages;
   }
 
+  static makeClassLine(classes, showSelect) {
+    if (showSelect) {
+      return classes;
+    } else {
+      return classes + " hidden";
+    }
+  }
+
   render() {
     let {
         table,
         handlePageSet,
         setPageSize,
+        showSelect
     } = this.props;
     return (
         <div className="row">
-          <div className="col-sm-2 col-md-2 col-lg-2 col-xs-2">
+          <div
+              className={PaginationView.makeClassLine("col-sm-2 col-md-2 col-lg-2 col-xs-2", showSelect)}>
             <div className="form-group">
               <label htmlFor="table-page-size-selec">Page size:</label>
               <select
@@ -1828,9 +1905,7 @@ class PaginationView extends React.Component {
                     ? ''
                     : 'disabled'}>
                   <a aria-label="Next"
-                     onClick={() => {
-                       handlePageSet(table.getMaxPage())
-                     }}>
+                     onClick={() => handlePageSet(table.getMaxPage())}>
                     <span aria-hidden="true">&raquo;</span>
                   </a>
                 </li>
@@ -1842,9 +1917,46 @@ class PaginationView extends React.Component {
   };
 }
 
+
+const selectedTab = {
+  SIMPLE: 'simple-query',
+  RAW: 'raw-query'
+};
+
+
 class QueryInput extends React.Component {
   constructor(props) {
     super(props);
+  }
+
+  updateState(item) {
+    let {items, steps} = this.state.query;
+    let newItems = items.slice();
+    let newSteps = steps.slice();
+    newSteps.push(this.state.step);
+    newItems.push(item);
+    let newValue = newItems.join(' ');
+    this.setState({query: {value: newValue, items: newItems, steps: newSteps}});
+    return newValue;
+  }
+
+  rewindStep(exportQuery) {
+    let {items, steps} = this.state.query;
+    if (steps.length > 0) {
+      let newSteps = steps.slice();
+      let newCurrentStep = newSteps.pop();
+      let newItems = items.slice(0, items.length - 1);
+      let newValue = newItems.join(' ');
+      this.setState({
+        step: steps[steps.length - 1],
+        query: {value: newValue, items: newItems, steps: newSteps}
+      });
+      exportQuery(newValue);
+    }
+  }
+
+  gotoStep(step) {
+    this.setState({step});
   }
 
   static addErrorClass(base, error) {
@@ -1857,21 +1969,88 @@ class QueryInput extends React.Component {
     return classes;
   }
 
+  changeTab(tab) {
+    if (tab === selectedTab.RAW) {
+      this.props.onChange(this.state.query.value)
+    }
+    this.setState({tab});
+
+  }
+
+  componentWillMount() {
+    let {query, step} = queryToState(this.props.query);
+    this.setState({
+      tab: selectedTab.SIMPLE,
+      query,
+      step
+    });
+  }
+
+  handleRawQueryUpdate(queryText) {
+    try {
+      let {query, step} = queryToState(queryText);
+      this.setState({
+        query,
+        step
+      });
+    } catch (e) {
+    }
+
+    this.props.onChange(queryText);
+  }
+
   render() {
 
-    let {onChange, query, error} = this.props;
+    let {onChange, query, error, table} = this.props;
     let hasError = !!error;
 
+    let {tab, step, query:simpleQuery} = this.state;
+
     return (
-        <div
-            className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
-          <label htmlFor='tableViewFilterQuery'>Filter Query</label>
-          <input
-              id='tableViewFilterQuery'
-              type='text'
-              className='form-control'
-              onChange={(evt) => onChange(evt.target.value)}
-              value={query}/>
+
+        <div>
+
+          <ul className="nav nav-tabs" role="tablist">
+            <li role="presentation"
+                className={tab === selectedTab.SIMPLE ? 'active' : ''}>
+              <a onClick={(e) => this.changeTab(selectedTab.SIMPLE)} role="tab">Simple
+                query</a>
+            </li>
+            <li role="presentation"
+                className={tab === selectedTab.RAW ? 'active' : ''}>
+              <a onClick={(e) => this.changeTab(selectedTab.RAW)} role="tab">Raw
+                query</a>
+            </li>
+          </ul>
+
+          <div className="tab-content">
+            <div role="tabpanel"
+                 className={tab === selectedTab.SIMPLE ? 'tab-pane active' : 'tab-pane'}>
+              <br/>
+              <SimpleQueryInput gotoStep={(step) => this.gotoStep(step)}
+                                updateState={(item) => this.updateState(item)}
+                                step={step}
+                                rewindStep={() => this.rewindStep(onChange)}
+                                query={simpleQuery}
+                                table={table}
+                                exportQuery={(value) => onChange(value)}/>
+            </div>
+            <div role="tabpanel"
+                 className={tab === selectedTab.RAW ? 'tab-pane active' : 'tab-pane'}>
+              <br/>
+              <div
+                  className={QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError)}>
+                <label htmlFor='tableViewFilterQuery'>Filter Query</label>
+                <input
+                    id='tableViewFilterQuery'
+                    type='text'
+                    className='form-control'
+                    onChange={(evt) => this.handleRawQueryUpdate(evt.target.value)}
+                    value={query}/>
+              </div>
+            </div>
+          </div>
+
         </div>
     )
   }
@@ -1898,6 +2077,272 @@ class RowView extends React.Component {
         </tr>
     )
   };
+}
+
+
+export const queryToState = (query) => {
+  if (query.trim() != '') {
+    try {
+      let ast = parser.parse(query);
+      let tmpState = reduceAstToState(ast);
+      return {
+        step: step.LOGIC,
+        query: {
+          value: tmpState.items.join(' '),
+          items: tmpState.items,
+          steps: tmpState.steps
+        }
+      };
+    } catch (e) {
+    }
+  } else {
+    return {
+      step: step.COLUMN,
+      query: {value: '', items: [], steps: []}
+    }
+  }
+};
+
+export const step = {
+  COLUMN: 'choose-column',
+  ACTION: 'choose-action',
+  VALUE: 'choose-value',
+  LOGIC: 'chose-logic-actions'
+};
+
+export const actionType = {
+  SIMPLE: 'simple',
+  PARAM: 'param'
+};
+
+export const logicActions = {
+  and: {
+    view: '&&'
+  },
+  or: {
+    view: '||'
+  }
+};
+
+export const actions = {
+  l: {
+    view: '<',
+    type: actionType.PARAM
+  },
+  lt: {
+    view: '<=',
+    type: actionType.PARAM
+  },
+  g: {
+    view: '>',
+    type: actionType.PARAM
+  },
+  gt: {
+    view: '>=',
+    type: actionType.PARAM
+  },
+  eq: {
+    view: '=',
+    type: actionType.PARAM
+  },
+  con: {
+    view: '*',
+    type: actionType.PARAM
+  },
+  exc: {
+    view: '!',
+    type: actionType.PARAM
+  },
+  st: {
+    view: '{',
+    type: actionType.PARAM
+  },
+  end: {
+    view: '}',
+    type: actionType.PARAM
+  },
+  empty: {
+    view: '[empty]',
+    type: actionType.SIMPLE
+  },
+  nonempty: {
+    view: '[nonempty]',
+    type: actionType.SIMPLE
+  }
+
+};
+
+class SimpleQueryInput extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  componentWillMount() {
+    this.setState({
+      manualValue: ''
+    });
+  }
+
+
+  chooseColumn(columnName) {
+    columnName = '"' + columnName + '"';
+    this.props.updateState(columnName);
+    this.props.gotoStep(step.ACTION);
+  }
+
+  chooseAction(action, exportQuery) {
+    const newQuery = this.props.updateState(action.view);
+    if (action.type === actionType.PARAM) {
+      this.props.gotoStep(step.VALUE);
+    } else if (action.type === actionType.SIMPLE) {
+      exportQuery(newQuery);
+      this.props.gotoStep(step.LOGIC);
+    }
+  }
+
+  chooseValue(value, exportQuery) {
+    this.setState({manualValue: ''});
+    let result = '';
+    if (value.value) {
+      result = value.value;
+    } else if (value.column) {
+      result = '"' + value.column + '"';
+    }
+
+    if (result !== '') {
+      const newQuery = this.props.updateState(result);
+      exportQuery(newQuery);
+      this.props.gotoStep(step.LOGIC);
+    }
+  }
+
+  chooseLogic(logic) {
+    this.props.updateState(logic);
+    this.props.gotoStep(step.COLUMN);
+  }
+
+  renderChooseColumn(table, handler) {
+    let columns = table.columns;
+    return (
+        <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+          <label className="control-label">Choose column</label>
+          <br/>
+          <div className="btn-group" role="group">
+            {columns.map((column) => <button key={column.name} type="button"
+                                             className="btn btn-default"
+                                             onClick={(e) => handler(column.name)}>{column.name}</button>)}
+          </div>
+        </div>
+    )
+  }
+
+  renderChooseAction(handler) {
+    return (
+        <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+          <label className="control-label">Choose operator</label>
+          <br/>
+          <div className="btn-group" role="group">
+            {Object.keys(actions).map((key) => {
+              const action = actions[key];
+              return (
+                  <button key={action.view} type="button"
+                          className="btn btn-default"
+                          onClick={(e) => handler(action)}>{action.view}</button>);
+            })}
+          </div>
+        </div>)
+  }
+
+  renderChooseValue(table, handler) {
+    let columns = table.columns;
+    let {manualValue} = this.state;
+    return (
+        <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+          <label className="control-label">Input value</label>
+
+          <div className="input-group">
+            <input type="text" className="form-control"
+                   value={manualValue}
+                   onChange={(evt) => {
+                     this.setState({manualValue: evt.target.value})
+                   }}
+                   placeholder=""/>
+            <span className="input-group-btn ">
+                <button className="btn btn-default"
+                        onClick={(evt) => handler({value: manualValue})}
+                        type="button">Ok</button>
+              </span>
+          </div>
+
+          <label className="control-label">or choose column</label>
+          <br/>
+          <div className="btn-group" role="group">
+            {columns.map((column) => <button key={column.name} type="button"
+                                             className="btn btn-default"
+                                             onClick={(e) => handler({column: column.name})}>{column.name}</button>)}
+          </div>
+          <br/>
+        </div>
+    )
+  }
+
+  renderChooseLogic(handler) {
+    return (
+        <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+          <label className="control-label">Choose logic operator</label>
+          <br/>
+          <div className="btn-group" role="group">
+            {Object.keys(logicActions).map((key) => {
+              const {view} = logicActions[key];
+              return (
+                  <button key={view} type="button"
+                          className="btn btn-default"
+                          onClick={(e) => handler(view)}>{view}</button>);
+            })}
+          </div>
+        </div>)
+  }
+
+  renderNeededHelper(table, exportQuery) {
+    let {step:currentStep} = this.props;
+
+    switch (currentStep) {
+      case step.ACTION:
+        return this.renderChooseAction((act) => this.chooseAction(act, exportQuery));
+      case step.COLUMN:
+        return this.renderChooseColumn(table, (cn) => this.chooseColumn(cn));
+      case step.VALUE:
+        return this.renderChooseValue(table, (val) => this.chooseValue(val, exportQuery));
+      case step.LOGIC:
+        return this.renderChooseLogic((lo) => this.chooseLogic(lo))
+    }
+  }
+
+  render() {
+
+    let {table, exportQuery, query, rewindStep} = this.props;
+
+    return (
+        <div>
+          <div className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+            <label className="control-label">Resulting query</label>
+            <br/>
+
+            <div className="input-group">
+              <input type="text" disabled={true} className="form-control"
+                     placeholder="" value={query.value}/>
+              <span className="input-group-btn">
+                <button className="btn btn-default"
+                        disabled={query.items.length === 0}
+                        onClick={() => rewindStep(exportQuery)}
+                        type="button">Backspace</button>
+              </span>
+            </div>
+          </div>
+          {this.renderNeededHelper(table, exportQuery)}
+        </div>
+    )
+  }
 }
 
 
@@ -1993,9 +2438,6 @@ class TableView extends React.Component {
                 columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
                 resetOrdering={() => this.resetOrdering()}
                 resetColumnOrdering={() => this.columnMoveReset()}/>
-            <PaginationView table={table}
-                            handlePageSet={(pageNum) => this.handlePageSet(pageNum)}
-                            setPageSize={(pageSize) => this.setPageSize(pageSize)}/>
             <table className="table table-responsive table-bordered">
               <Header
                   columnMoveHandler={(s, c) => {
@@ -2011,6 +2453,8 @@ class TableView extends React.Component {
               </tbody>
             </table>
             <PaginationView table={table}
+                            showSelect={true}
+                            setPageSize={(pageSize) => this.setPageSize(pageSize)}
                             handlePageSet={(pageNum) => this.handlePageSet(pageNum)}/>
           </div>
       )
@@ -2018,6 +2462,5 @@ class TableView extends React.Component {
     return (null);
   };
 }
-
 
 export default TableView;

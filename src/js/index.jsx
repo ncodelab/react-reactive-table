@@ -13,7 +13,7 @@ render(
       <TableView
           socket={socket}
           eventName="event"
-          filterQuery=''
+          filterQuery='"item" } _name  && "price" = "amount" || "amount" > "price"'
           filterQueryExporter={(expr) => console.log(expr)}
           pageSize={20}/>
     </div>,

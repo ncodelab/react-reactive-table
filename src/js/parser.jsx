@@ -1,21 +1,18 @@
-export const parser = (function () {
+export const parser = (function() {
   "use strict";
 
   function peg$subclass(child, parent) {
-    function ctor() {
-      this.constructor = child;
-    }
-
+    function ctor() { this.constructor = child; }
     ctor.prototype = parent.prototype;
     child.prototype = new ctor();
   }
 
   function peg$SyntaxError(message, expected, found, location) {
-    this.message = message;
+    this.message  = message;
     this.expected = expected;
-    this.found = found;
+    this.found    = found;
     this.location = location;
-    this.name = "SyntaxError";
+    this.name     = "SyntaxError";
 
     if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, peg$SyntaxError);
@@ -24,13 +21,13 @@ export const parser = (function () {
 
   peg$subclass(peg$SyntaxError, Error);
 
-  peg$SyntaxError.buildMessage = function (expected, found) {
+  peg$SyntaxError.buildMessage = function(expected, found) {
     var DESCRIBE_EXPECTATION_FNS = {
-      literal: function (expectation) {
+      literal: function(expectation) {
         return "\"" + literalEscape(expectation.text) + "\"";
       },
 
-      "class": function (expectation) {
+      "class": function(expectation) {
         var escapedParts = "",
             i;
 
@@ -43,15 +40,15 @@ export const parser = (function () {
         return "[" + (expectation.inverted ? "^" : "") + escapedParts + "]";
       },
 
-      any: function (expectation) {
+      any: function(expectation) {
         return "any character";
       },
 
-      end: function (expectation) {
+      end: function(expectation) {
         return "end of input";
       },
 
-      other: function (expectation) {
+      other: function(expectation) {
         return expectation.description;
       }
     };
@@ -63,17 +60,13 @@ export const parser = (function () {
     function literalEscape(s) {
       return s
           .replace(/\\/g, '\\\\')
-          .replace(/"/g, '\\"')
+          .replace(/"/g,  '\\"')
           .replace(/\0/g, '\\0')
           .replace(/\t/g, '\\t')
           .replace(/\n/g, '\\n')
           .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g, function (ch) {
-            return '\\x0' + hex(ch);
-          })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
-            return '\\x' + hex(ch);
-          });
+          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
+          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
     }
 
     function classEscape(s) {
@@ -81,17 +74,13 @@ export const parser = (function () {
           .replace(/\\/g, '\\\\')
           .replace(/\]/g, '\\]')
           .replace(/\^/g, '\\^')
-          .replace(/-/g, '\\-')
+          .replace(/-/g,  '\\-')
           .replace(/\0/g, '\\0')
           .replace(/\t/g, '\\t')
           .replace(/\n/g, '\\n')
           .replace(/\r/g, '\\r')
-          .replace(/[\x00-\x0F]/g, function (ch) {
-            return '\\x0' + hex(ch);
-          })
-          .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
-            return '\\x' + hex(ch);
-          });
+          .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
+          .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
     }
 
     function describeExpectation(expectation) {
@@ -144,11 +133,11 @@ export const parser = (function () {
 
     var peg$FAILED = {},
 
-        peg$startRuleFunctions = {Query: peg$parseQuery},
-        peg$startRuleFunction = peg$parseQuery,
+        peg$startRuleFunctions = { Query: peg$parseQuery },
+        peg$startRuleFunction  = peg$parseQuery,
 
-        peg$c0 = function (head, tail) {
-          return tail.reduce(function (r, e) {
+        peg$c0 = function(head, tail) {
+          return tail.reduce(function(r, e) {
             return {
               'l': r,
               'r': e[1],
@@ -160,20 +149,20 @@ export const parser = (function () {
         peg$c2 = peg$literalExpectation("[empty]", false),
         peg$c3 = "[nonempty]",
         peg$c4 = peg$literalExpectation("[nonempty]", false),
-        peg$c5 = function (col, check) {
+        peg$c5 = function(col, check) {
           return {
             'col': col,
             'check': check
           }
         },
-        peg$c6 = function (col1, act, col2) {
+        peg$c6 = function(col1, act, col2) {
           return {
-            'col1': col1,
+            'col1':col1,
             'act': act,
             'col2': col2
           }
         },
-        peg$c7 = function (col, act, exp) {
+        peg$c7 = function(col, act, exp) {
           return {
             'col': col,
             'act': act,
@@ -202,12 +191,8 @@ export const parser = (function () {
         peg$c27 = peg$literalExpectation("}", false),
         peg$c28 = "{",
         peg$c29 = peg$literalExpectation("{", false),
-        peg$c30 = function (items) {
-          return items[1];
-        },
-        peg$c31 = function (chars) {
-          return chars.join("");
-        },
+        peg$c30 = function(items) {return items[1];},
+        peg$c31 = function(chars) {return chars.join("");},
         peg$c32 = /^[a-zA-Z0-9<>.[\]@#$%\^-_+ ]/,
         peg$c33 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "<", ">", ".", "[", "]", "@", "#", "$", "%", ["^", "_"], "+", " "], false, false),
         peg$c34 = /^[ \t\n\r]/,
@@ -215,12 +200,12 @@ export const parser = (function () {
         peg$c36 = "\"",
         peg$c37 = peg$literalExpectation("\"", false),
 
-        peg$currPos = 0,
-        peg$savedPos = 0,
-        peg$posDetailsCache = [{line: 1, column: 1}],
-        peg$maxFailPos = 0,
-        peg$maxFailExpected = [],
-        peg$silentFails = 0,
+        peg$currPos          = 0,
+        peg$savedPos         = 0,
+        peg$posDetailsCache  = [{ line: 1, column: 1 }],
+        peg$maxFailPos       = 0,
+        peg$maxFailExpected  = [],
+        peg$silentFails      = 0,
 
         peg$result;
 
@@ -257,28 +242,23 @@ export const parser = (function () {
     }
 
     function peg$literalExpectation(text, ignoreCase) {
-      return {type: "literal", text: text, ignoreCase: ignoreCase};
+      return { type: "literal", text: text, ignoreCase: ignoreCase };
     }
 
     function peg$classExpectation(parts, inverted, ignoreCase) {
-      return {
-        type: "class",
-        parts: parts,
-        inverted: inverted,
-        ignoreCase: ignoreCase
-      };
+      return { type: "class", parts: parts, inverted: inverted, ignoreCase: ignoreCase };
     }
 
     function peg$anyExpectation() {
-      return {type: "any"};
+      return { type: "any" };
     }
 
     function peg$endExpectation() {
-      return {type: "end"};
+      return { type: "end" };
     }
 
     function peg$otherExpectation(description) {
-      return {type: "other", description: description};
+      return { type: "other", description: description };
     }
 
     function peg$computePosDetails(pos) {
@@ -294,7 +274,7 @@ export const parser = (function () {
 
         details = peg$posDetailsCache[p];
         details = {
-          line: details.line,
+          line:   details.line,
           column: details.column
         };
 
@@ -316,26 +296,24 @@ export const parser = (function () {
 
     function peg$computeLocation(startPos, endPos) {
       var startPosDetails = peg$computePosDetails(startPos),
-          endPosDetails = peg$computePosDetails(endPos);
+          endPosDetails   = peg$computePosDetails(endPos);
 
       return {
         start: {
           offset: startPos,
-          line: startPosDetails.line,
+          line:   startPosDetails.line,
           column: startPosDetails.column
         },
         end: {
           offset: endPos,
-          line: endPosDetails.line,
+          line:   endPosDetails.line,
           column: endPosDetails.column
         }
       };
     }
 
     function peg$fail(expected) {
-      if (peg$currPos < peg$maxFailPos) {
-        return;
-      }
+      if (peg$currPos < peg$maxFailPos) { return; }
 
       if (peg$currPos > peg$maxFailPos) {
         peg$maxFailPos = peg$currPos;
@@ -464,9 +442,7 @@ export const parser = (function () {
               peg$currPos += 7;
             } else {
               s4 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c2);
-              }
+              if (peg$silentFails === 0) { peg$fail(peg$c2); }
             }
             if (s4 === peg$FAILED) {
               if (input.substr(peg$currPos, 10) === peg$c3) {
@@ -474,9 +450,7 @@ export const parser = (function () {
                 peg$currPos += 10;
               } else {
                 s4 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c4);
-                }
+                if (peg$silentFails === 0) { peg$fail(peg$c4); }
               }
             }
             if (s4 !== peg$FAILED) {
@@ -623,9 +597,7 @@ export const parser = (function () {
         peg$currPos += 2;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c9);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c9); }
       }
       if (s0 === peg$FAILED) {
         if (input.substr(peg$currPos, 2) === peg$c10) {
@@ -633,9 +605,7 @@ export const parser = (function () {
           peg$currPos += 2;
         } else {
           s0 = peg$FAILED;
-          if (peg$silentFails === 0) {
-            peg$fail(peg$c11);
-          }
+          if (peg$silentFails === 0) { peg$fail(peg$c11); }
         }
       }
 
@@ -650,9 +620,7 @@ export const parser = (function () {
         peg$currPos += 2;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c13);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c13); }
       }
       if (s0 === peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 60) {
@@ -660,9 +628,7 @@ export const parser = (function () {
           peg$currPos++;
         } else {
           s0 = peg$FAILED;
-          if (peg$silentFails === 0) {
-            peg$fail(peg$c15);
-          }
+          if (peg$silentFails === 0) { peg$fail(peg$c15); }
         }
         if (s0 === peg$FAILED) {
           if (input.substr(peg$currPos, 2) === peg$c16) {
@@ -670,9 +636,7 @@ export const parser = (function () {
             peg$currPos += 2;
           } else {
             s0 = peg$FAILED;
-            if (peg$silentFails === 0) {
-              peg$fail(peg$c17);
-            }
+            if (peg$silentFails === 0) { peg$fail(peg$c17); }
           }
           if (s0 === peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 62) {
@@ -680,9 +644,7 @@ export const parser = (function () {
               peg$currPos++;
             } else {
               s0 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c19);
-              }
+              if (peg$silentFails === 0) { peg$fail(peg$c19); }
             }
             if (s0 === peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 61) {
@@ -690,9 +652,7 @@ export const parser = (function () {
                 peg$currPos++;
               } else {
                 s0 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c21);
-                }
+                if (peg$silentFails === 0) { peg$fail(peg$c21); }
               }
               if (s0 === peg$FAILED) {
                 if (input.charCodeAt(peg$currPos) === 42) {
@@ -700,9 +660,7 @@ export const parser = (function () {
                   peg$currPos++;
                 } else {
                   s0 = peg$FAILED;
-                  if (peg$silentFails === 0) {
-                    peg$fail(peg$c23);
-                  }
+                  if (peg$silentFails === 0) { peg$fail(peg$c23); }
                 }
                 if (s0 === peg$FAILED) {
                   if (input.charCodeAt(peg$currPos) === 33) {
@@ -710,9 +668,7 @@ export const parser = (function () {
                     peg$currPos++;
                   } else {
                     s0 = peg$FAILED;
-                    if (peg$silentFails === 0) {
-                      peg$fail(peg$c25);
-                    }
+                    if (peg$silentFails === 0) { peg$fail(peg$c25); }
                   }
                   if (s0 === peg$FAILED) {
                     if (input.charCodeAt(peg$currPos) === 125) {
@@ -720,9 +676,7 @@ export const parser = (function () {
                       peg$currPos++;
                     } else {
                       s0 = peg$FAILED;
-                      if (peg$silentFails === 0) {
-                        peg$fail(peg$c27);
-                      }
+                      if (peg$silentFails === 0) { peg$fail(peg$c27); }
                     }
                     if (s0 === peg$FAILED) {
                       if (input.charCodeAt(peg$currPos) === 123) {
@@ -730,9 +684,7 @@ export const parser = (function () {
                         peg$currPos++;
                       } else {
                         s0 = peg$FAILED;
-                        if (peg$silentFails === 0) {
-                          peg$fail(peg$c29);
-                        }
+                        if (peg$silentFails === 0) { peg$fail(peg$c29); }
                       }
                     }
                   }
@@ -811,9 +763,7 @@ export const parser = (function () {
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c33);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c33); }
       }
 
       return s0;
@@ -828,9 +778,7 @@ export const parser = (function () {
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c35);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c35); }
       }
       while (s1 !== peg$FAILED) {
         s0.push(s1);
@@ -839,9 +787,7 @@ export const parser = (function () {
           peg$currPos++;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) {
-            peg$fail(peg$c35);
-          }
+          if (peg$silentFails === 0) { peg$fail(peg$c35); }
         }
       }
 
@@ -856,9 +802,7 @@ export const parser = (function () {
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) {
-          peg$fail(peg$c37);
-        }
+        if (peg$silentFails === 0) { peg$fail(peg$c37); }
       }
 
       return s0;
@@ -885,6 +829,6 @@ export const parser = (function () {
 
   return {
     SyntaxError: peg$SyntaxError,
-    parse: peg$parse
+    parse:       peg$parse
   };
 })();
