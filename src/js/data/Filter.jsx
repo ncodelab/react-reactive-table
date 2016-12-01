@@ -22,10 +22,19 @@ class Filter {
      */
     this.__LOGIC_SYNTAX = {
       //Intersection
-      '&&': (lRows = [], rRows = []) =>  lRows.filter((n) => rRows.indexOf(n) !== -1),
+      '&&': (lRows = [], rRows = []) => lRows.filter((n) => rRows.indexOf(n) !== -1),
       //Concatenation with deduplicate;
       '||': (lRows = [], rRows = []) => [...new Set(lRows.concat(rRows)).values()]
     };
+
+    /**
+     * @type {Object<string,function(string, string): Boolean>}
+     */
+    this.__CHECK_SYNTAX = {
+      '[empty]': (value) => value == '',
+      '[nonempty]': (value) => value != ''
+    };
+
 
     /**
      * @type {Object<string,function(string, string): Boolean>}
@@ -35,7 +44,9 @@ class Filter {
       '<=': (value, expectation) => value <= expectation,
       '>': (value, expectation) => value > expectation,
       '>=': (value, expectation) => value >= expectation,
-      '=': (value, expectation) => value == expectation,
+      '=': (value, expectation) => {
+        return value == expectation
+      },
       '*': (value, expectation) => {
         if (typeof value === 'string') {
           return value.indexOf(expectation) !== -1
@@ -86,7 +97,7 @@ class Filter {
     var lastExpression = this.__parsedExpression;
     if (expression.length > 0) {
       try {
-        this.__parsedExpression = parser.parse(expression, {'startRule': 'Expression'});
+        this.__parsedExpression = parser.parse(expression, {'startRule': 'Query'});
       } catch (e) {
         this.lastError = e.message;
       }
@@ -105,6 +116,15 @@ class Filter {
     return term['col'] && term['act'] && term['exp']
   }
 
+
+  static __isInterColumnTermValid(term) {
+    return term['col1'] && term['col2'] && term['act'];
+  }
+
+  static __isNonArgumentedTermValid(term) {
+    return term['col'] && term['check'];
+  }
+
   static __isExpressionValid(expression) {
     return expression['l'] && expression['r'] && expression['op'];
   }
@@ -114,10 +134,35 @@ class Filter {
     return rows.filter((row) => {
       let value = row.getValueByColumnName(columnName);
       if (value) {
-        return this.__SEARCH_SYNTAX[action](value, expectation);
+        return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
       }
       return true;
     });
+  }
+
+  __reduceInterColumnTerm(rows, term) {
+    let {col1: firstColumnName, col2: secondColumnName, act: action} = term;
+    return rows.filter((row) => {
+      let firstValue = row.getValueByColumnName(firstColumnName);
+      let secondValue = row.getValueByColumnName(secondColumnName);
+      if (firstValue && secondValue) {
+        return this.__SEARCH_SYNTAX[action](firstValue.toString(), secondValue.toString())
+      }
+      return true;
+    })
+  }
+
+  __reduceNonArgumentedTerm(rows, term) {
+    let {col: columnName, check} = term;
+    return rows.filter((row) => {
+      let value = row.getValueByColumnName(columnName);
+      if (value) {
+        return this.__CHECK_SYNTAX[check](value.toString());
+      }
+      return true;
+    })
+
+
   }
 
   __reduceExpression(expression) {
@@ -134,6 +179,13 @@ class Filter {
     }
     if (Filter.__isTermValid(tree)) {
       return this.__reduceTerm(rows, tree);
+    }
+    if (Filter.__isInterColumnTermValid(tree)) {
+      return this.__reduceInterColumnTerm(rows, tree);
+    }
+
+    if (Filter.__isNonArgumentedTermValid(tree)) {
+      return this.__reduceNonArgumentedTerm(rows, tree);
     }
   }
 

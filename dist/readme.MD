@@ -9,8 +9,7 @@ import TableView from './TableViewDist.jsx'
             socket={socket}
             eventName='event'
             filterQuery=''
-            filterQueryExporter={(expr) => console.log(expr)
-            pageSize={20}}/>
+            filterQueryExporter={(expr) => console.log(expr)}/>
 ```
 
 Where
@@ -19,7 +18,6 @@ Where
 * `eventName` - name of event to subscribe. Will be used as argument for `socket.on()`
 * `filterQuery` - query which will be used on initial rendering
 * `filterQueryExporter` - callback with signature `funciton(string)` which will be called on successful filter query parsing.
-* `pageSize` - number of rows which will be showed on page.
 
 
 

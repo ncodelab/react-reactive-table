@@ -27,6 +27,7 @@ class Header extends React.Component {
   }
 
   handleWidthChange(currentX, initialX, leftColumn, rightColumn) {
+
     const diff = initialX - currentX;
 
     const newState = Object.assign({}, this.state.columnsWidth);
@@ -135,30 +136,30 @@ class Header extends React.Component {
         <tr>
           {columns.filter(column => column.visibility).map((column, idx, collection) => {
 
-              const notLast = idx < (collection.length - 1);
-              const last = idx === collection.length;
-              const first = idx === 0
+            const notLast = idx < (collection.length - 1);
+            const last = idx === collection.length;
+            const first = idx === 0
 
-              let result = [
-                <ColumnView
-                    column={column}
-                    orderedByColumn={orderingColumn}
-                    notLast={notLast}
-                    last={last}
-                    first={first}
-                    width={columnsWidth[column.name]}
-                    order={this.state.order}
-                    columnMoveHandler={columnMoveHandler}
-                    columnOrderingHandler={(columnName) => columnOrderingHandler(columnName, this.toggleOrdering(columnName))}/>
-              ];
+            let result = [
+              <ColumnView
+                  column={column}
+                  orderedByColumn={orderingColumn}
+                  notLast={notLast}
+                  last={last}
+                  first={first}
+                  width={columnsWidth[column.name]}
+                  order={this.state.order}
+                  columnMoveHandler={columnMoveHandler}
+                  columnOrderingHandler={(columnName) => columnOrderingHandler(columnName, this.toggleOrdering(columnName))}/>
+            ];
 
-              if (notLast) {
-                result.push(<ColumnResizerView
-                    handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)}
-                />)
-              }
+            if (notLast) {
+              result.push(<ColumnResizerView
+                  handleWidthChange={(curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)}
+              />)
+            }
 
-              return (result);
+            return (result);
           })}
         </tr>
         </thead>

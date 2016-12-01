@@ -1,34 +1,57 @@
+Query = (Expression / Term)
+
 Expression
-  = head:Term tail:(_ ("&&" / "||") _ Term)* {
-      return tail.reduce(function(result, element) {
-          return {
-          	'l': result,
-            'r': element[3],
-            'op': element[1]
-          }
-      }, head);
-    }
-
-Term
-  = head: Column tail:(_ ( "<=" / "<" / ">=" / ">" / "=" / "*" / "!" / "}" / "{") _ Expected)+ {
-      return tail.reduce(function(result, element) {
+  = head:Term _ tail:(LogicAction Term)+  {
+      return tail.reduce(function(r, e) {
          return {
-           'col': result[1],
-           'act': element[1],
-           'exp': element[3]
-         }
+           'l': r,
+           'r': e[1],
+           'op': e[0]
+         };
       }, head);
     }
 
-Column = Quote Word Quote
+Term =  (NonParametrizedTerm / InterColumnTerm / SimpleTerm)
+
+NonParametrizedTerm
+ = _ col: Column _ check:("[empty]" / "[nonempty]") _ {
+ 	return {
+          'col': col,
+          'check': check
+        }
+ }
+
+InterColumnTerm
+  = _ col1: Column _ act:SearchAction _ col2:Column _ {
+      return {
+           'col1':col1,
+           'act': act,
+           'col2': col2
+         }
+    }
+
+SimpleTerm
+  = _ col: Column _ act:SearchAction _ exp: Expected _ {
+      return {
+           'col': col,
+           'act': act,
+           'exp': exp
+         }
+    }
+    
+LogicAction = ("&&" / "||")
+    
+SearchAction = ( "<=" / "<" / ">=" / ">" / "=" / "*" / "!" / "}" / "{")
+
+Column = items:(Quote Word Quote) {return items[1];}
 
 Expected = Word
 
-Word = chars:Letter+ {return chars.join("");}
+Word = chars:(Letters+) {return chars.join("");}
 
-Letter = [a-zA-Z0-9]
+Letters = [a-zA-Z0-9<>\.\[\]@#$%^-_+ ]
 
 _ = [ \t\n\r]*
 
-Quote = [\"]
+Quote = '"'
 

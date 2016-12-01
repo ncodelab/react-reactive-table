@@ -19,29 +19,25 @@ var random = function (from, to) {
 
 var getName = function () {
   var names = [
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
+    "first name",
+    "sevond name",
+    "third name",
+    "fourth name",
+    "fifth_name",
+    "sixth_name",
+    "mmmmmmm_name",
+    "meh",
+    "loldlold",
   ];
   return names[random(0, names.length - 1)];
 };
 
 var getPrice = function () {
-  return random(100, 1000);
+  return random(100, 110);
 };
 
 var getAmount = function () {
-  return random(0, 500);
+  return random(100, 110);
 };
 
 var getWeight = function () {
@@ -72,9 +68,9 @@ var randomRow = function(key) {
       case 'item':
         return {'column': column, 'value': getName()};
       case 'price':
-        return {'column': column, 'value': getPrice()};
+        return {'column': column, 'value': getPrice()== 104 ? '': getPrice()};
       case 'price with VAT':
-        return {'column': column, 'value': getPrice()};
+        return {'column': column, 'value': getPrice() == 104 ? '': getPrice()};
       case 'amount':
         return {'column': column, 'value': getAmount()};
       case 'weight':

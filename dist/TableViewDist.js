@@ -8,6 +8,7 @@ export const parser = function () {
     function ctor() {
       this.constructor = child;
     }
+
     ctor.prototype = parent.prototype;
     child.prototype = new ctor();
   }
@@ -124,57 +125,75 @@ export const parser = function () {
     options = options !== void 0 ? options : {};
 
     var peg$FAILED = {},
-        peg$startRuleFunctions = { Expression: peg$parseExpression },
-        peg$startRuleFunction = peg$parseExpression,
-        peg$c0 = "&&",
-        peg$c1 = peg$literalExpectation("&&", false),
-        peg$c2 = "||",
-        peg$c3 = peg$literalExpectation("||", false),
-        peg$c4 = function (head, tail) {
-      return tail.reduce(function (result, element) {
-        return {
-          'l': result,
-          'r': element[3],
-          'op': element[1]
-        };
-      }, head);
-    },
-        peg$c5 = "<=",
-        peg$c6 = peg$literalExpectation("<=", false),
-        peg$c7 = "<",
-        peg$c8 = peg$literalExpectation("<", false),
-        peg$c9 = ">=",
-        peg$c10 = peg$literalExpectation(">=", false),
-        peg$c11 = ">",
-        peg$c12 = peg$literalExpectation(">", false),
-        peg$c13 = "=",
-        peg$c14 = peg$literalExpectation("=", false),
-        peg$c15 = "*",
-        peg$c16 = peg$literalExpectation("*", false),
-        peg$c17 = "!",
-        peg$c18 = peg$literalExpectation("!", false),
-        peg$c19 = "}",
-        peg$c20 = peg$literalExpectation("}", false),
-        peg$c21 = "{",
-        peg$c22 = peg$literalExpectation("{", false),
-        peg$c23 = function (head, tail) {
-      return tail.reduce(function (result, element) {
-        return {
-          'col': result[1],
-          'act': element[1],
-          'exp': element[3]
-        };
-      }, head);
-    },
-        peg$c24 = function (chars) {
-      return chars.join("");
-    },
-        peg$c25 = /^[a-zA-Z0-9]/,
-        peg$c26 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"]], false, false),
-        peg$c27 = /^[ \t\n\r]/,
-        peg$c28 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
-        peg$c29 = /^["]/,
-        peg$c30 = peg$classExpectation(["\""], false, false),
+        peg$startRuleFunctions = { Query: peg$parseQuery },
+        peg$startRuleFunction = peg$parseQuery,
+        peg$c0 = function (head, tail) {
+          return tail.reduce(function (r, e) {
+            return {
+              'l': r,
+              'r': e[1],
+              'op': e[0]
+            };
+          }, head);
+        },
+        peg$c1 = "[empty]",
+        peg$c2 = peg$literalExpectation("[empty]", false),
+        peg$c3 = "[nonempty]",
+        peg$c4 = peg$literalExpectation("[nonempty]", false),
+        peg$c5 = function (col, check) {
+          return {
+            'col': col,
+            'check': check
+          };
+        },
+        peg$c6 = function (col1, act, col2) {
+          return {
+            'col1': col1,
+            'act': act,
+            'col2': col2
+          };
+        },
+        peg$c7 = function (col, act, exp) {
+          return {
+            'col': col,
+            'act': act,
+            'exp': exp
+          };
+        },
+        peg$c8 = "&&",
+        peg$c9 = peg$literalExpectation("&&", false),
+        peg$c10 = "||",
+        peg$c11 = peg$literalExpectation("||", false),
+        peg$c12 = "<=",
+        peg$c13 = peg$literalExpectation("<=", false),
+        peg$c14 = "<",
+        peg$c15 = peg$literalExpectation("<", false),
+        peg$c16 = ">=",
+        peg$c17 = peg$literalExpectation(">=", false),
+        peg$c18 = ">",
+        peg$c19 = peg$literalExpectation(">", false),
+        peg$c20 = "=",
+        peg$c21 = peg$literalExpectation("=", false),
+        peg$c22 = "*",
+        peg$c23 = peg$literalExpectation("*", false),
+        peg$c24 = "!",
+        peg$c25 = peg$literalExpectation("!", false),
+        peg$c26 = "}",
+        peg$c27 = peg$literalExpectation("}", false),
+        peg$c28 = "{",
+        peg$c29 = peg$literalExpectation("{", false),
+        peg$c30 = function (items) {
+          return items[1];
+        },
+        peg$c31 = function (chars) {
+          return chars.join("");
+        },
+        peg$c32 = /^[a-zA-Z0-9<>.[\]@#$%\^-_+ ]/,
+        peg$c33 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "<", ">", ".", "[", "]", "@", "#", "$", "%", ["^", "_"], "+", " "], false, false),
+        peg$c34 = /^[ \t\n\r]/,
+        peg$c35 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
+        peg$c36 = "\"",
+        peg$c37 = peg$literalExpectation("\"", false),
         peg$currPos = 0,
         peg$savedPos = 0,
         peg$posDetailsCache = [{ line: 1, column: 1 }],
@@ -216,7 +235,12 @@ export const parser = function () {
     }
 
     function peg$classExpectation(parts, inverted, ignoreCase) {
-      return { type: "class", parts: parts, inverted: inverted, ignoreCase: ignoreCase };
+      return {
+        type: "class",
+        parts: parts,
+        inverted: inverted,
+        ignoreCase: ignoreCase
+      };
     }
 
     function peg$anyExpectation() {
@@ -304,411 +328,66 @@ export const parser = function () {
       return new peg$SyntaxError(peg$SyntaxError.buildMessage(expected, found), expected, found, location);
     }
 
+    function peg$parseQuery() {
+      var s0;
+
+      s0 = peg$parseExpression();
+      if (s0 === peg$FAILED) {
+        s0 = peg$parseTerm();
+      }
+
+      return s0;
+    }
+
     function peg$parseExpression() {
-      var s0, s1, s2, s3, s4, s5, s6, s7;
+      var s0, s1, s2, s3, s4, s5, s6;
 
       s0 = peg$currPos;
       s1 = peg$parseTerm();
       if (s1 !== peg$FAILED) {
-        s2 = [];
-        s3 = peg$currPos;
-        s4 = peg$parse_();
-        if (s4 !== peg$FAILED) {
-          if (input.substr(peg$currPos, 2) === peg$c0) {
-            s5 = peg$c0;
-            peg$currPos += 2;
-          } else {
-            s5 = peg$FAILED;
-            if (peg$silentFails === 0) {
-              peg$fail(peg$c1);
-            }
-          }
-          if (s5 === peg$FAILED) {
-            if (input.substr(peg$currPos, 2) === peg$c2) {
-              s5 = peg$c2;
-              peg$currPos += 2;
-            } else {
-              s5 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c3);
-              }
-            }
-          }
+        s2 = peg$parse_();
+        if (s2 !== peg$FAILED) {
+          s3 = [];
+          s4 = peg$currPos;
+          s5 = peg$parseLogicAction();
           if (s5 !== peg$FAILED) {
-            s6 = peg$parse_();
+            s6 = peg$parseTerm();
             if (s6 !== peg$FAILED) {
-              s7 = peg$parseTerm();
-              if (s7 !== peg$FAILED) {
-                s4 = [s4, s5, s6, s7];
-                s3 = s4;
-              } else {
-                peg$currPos = s3;
-                s3 = peg$FAILED;
-              }
+              s5 = [s5, s6];
+              s4 = s5;
             } else {
-              peg$currPos = s3;
-              s3 = peg$FAILED;
+              peg$currPos = s4;
+              s4 = peg$FAILED;
             }
           } else {
-            peg$currPos = s3;
-            s3 = peg$FAILED;
+            peg$currPos = s4;
+            s4 = peg$FAILED;
           }
-        } else {
-          peg$currPos = s3;
-          s3 = peg$FAILED;
-        }
-        while (s3 !== peg$FAILED) {
-          s2.push(s3);
-          s3 = peg$currPos;
-          s4 = peg$parse_();
           if (s4 !== peg$FAILED) {
-            if (input.substr(peg$currPos, 2) === peg$c0) {
-              s5 = peg$c0;
-              peg$currPos += 2;
-            } else {
-              s5 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c1);
-              }
-            }
-            if (s5 === peg$FAILED) {
-              if (input.substr(peg$currPos, 2) === peg$c2) {
-                s5 = peg$c2;
-                peg$currPos += 2;
-              } else {
-                s5 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c3);
-                }
-              }
-            }
-            if (s5 !== peg$FAILED) {
-              s6 = peg$parse_();
-              if (s6 !== peg$FAILED) {
-                s7 = peg$parseTerm();
-                if (s7 !== peg$FAILED) {
-                  s4 = [s4, s5, s6, s7];
-                  s3 = s4;
-                } else {
-                  peg$currPos = s3;
-                  s3 = peg$FAILED;
-                }
-              } else {
-                peg$currPos = s3;
-                s3 = peg$FAILED;
-              }
-            } else {
-              peg$currPos = s3;
-              s3 = peg$FAILED;
-            }
-          } else {
-            peg$currPos = s3;
-            s3 = peg$FAILED;
-          }
-        }
-        if (s2 !== peg$FAILED) {
-          peg$savedPos = s0;
-          s1 = peg$c4(s1, s2);
-          s0 = s1;
-        } else {
-          peg$currPos = s0;
-          s0 = peg$FAILED;
-        }
-      } else {
-        peg$currPos = s0;
-        s0 = peg$FAILED;
-      }
-
-      return s0;
-    }
-
-    function peg$parseTerm() {
-      var s0, s1, s2, s3, s4, s5, s6, s7;
-
-      s0 = peg$currPos;
-      s1 = peg$parseColumn();
-      if (s1 !== peg$FAILED) {
-        s2 = [];
-        s3 = peg$currPos;
-        s4 = peg$parse_();
-        if (s4 !== peg$FAILED) {
-          if (input.substr(peg$currPos, 2) === peg$c5) {
-            s5 = peg$c5;
-            peg$currPos += 2;
-          } else {
-            s5 = peg$FAILED;
-            if (peg$silentFails === 0) {
-              peg$fail(peg$c6);
-            }
-          }
-          if (s5 === peg$FAILED) {
-            if (input.charCodeAt(peg$currPos) === 60) {
-              s5 = peg$c7;
-              peg$currPos++;
-            } else {
-              s5 = peg$FAILED;
-              if (peg$silentFails === 0) {
-                peg$fail(peg$c8);
-              }
-            }
-            if (s5 === peg$FAILED) {
-              if (input.substr(peg$currPos, 2) === peg$c9) {
-                s5 = peg$c9;
-                peg$currPos += 2;
-              } else {
-                s5 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c10);
-                }
-              }
-              if (s5 === peg$FAILED) {
-                if (input.charCodeAt(peg$currPos) === 62) {
-                  s5 = peg$c11;
-                  peg$currPos++;
-                } else {
-                  s5 = peg$FAILED;
-                  if (peg$silentFails === 0) {
-                    peg$fail(peg$c12);
-                  }
-                }
-                if (s5 === peg$FAILED) {
-                  if (input.charCodeAt(peg$currPos) === 61) {
-                    s5 = peg$c13;
-                    peg$currPos++;
-                  } else {
-                    s5 = peg$FAILED;
-                    if (peg$silentFails === 0) {
-                      peg$fail(peg$c14);
-                    }
-                  }
-                  if (s5 === peg$FAILED) {
-                    if (input.charCodeAt(peg$currPos) === 42) {
-                      s5 = peg$c15;
-                      peg$currPos++;
-                    } else {
-                      s5 = peg$FAILED;
-                      if (peg$silentFails === 0) {
-                        peg$fail(peg$c16);
-                      }
-                    }
-                    if (s5 === peg$FAILED) {
-                      if (input.charCodeAt(peg$currPos) === 33) {
-                        s5 = peg$c17;
-                        peg$currPos++;
-                      } else {
-                        s5 = peg$FAILED;
-                        if (peg$silentFails === 0) {
-                          peg$fail(peg$c18);
-                        }
-                      }
-                      if (s5 === peg$FAILED) {
-                        if (input.charCodeAt(peg$currPos) === 125) {
-                          s5 = peg$c19;
-                          peg$currPos++;
-                        } else {
-                          s5 = peg$FAILED;
-                          if (peg$silentFails === 0) {
-                            peg$fail(peg$c20);
-                          }
-                        }
-                        if (s5 === peg$FAILED) {
-                          if (input.charCodeAt(peg$currPos) === 123) {
-                            s5 = peg$c21;
-                            peg$currPos++;
-                          } else {
-                            s5 = peg$FAILED;
-                            if (peg$silentFails === 0) {
-                              peg$fail(peg$c22);
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-          if (s5 !== peg$FAILED) {
-            s6 = peg$parse_();
-            if (s6 !== peg$FAILED) {
-              s7 = peg$parseWord();
-              if (s7 !== peg$FAILED) {
-                s4 = [s4, s5, s6, s7];
-                s3 = s4;
-              } else {
-                peg$currPos = s3;
-                s3 = peg$FAILED;
-              }
-            } else {
-              peg$currPos = s3;
-              s3 = peg$FAILED;
-            }
-          } else {
-            peg$currPos = s3;
-            s3 = peg$FAILED;
-          }
-        } else {
-          peg$currPos = s3;
-          s3 = peg$FAILED;
-        }
-        if (s3 !== peg$FAILED) {
-          while (s3 !== peg$FAILED) {
-            s2.push(s3);
-            s3 = peg$currPos;
-            s4 = peg$parse_();
-            if (s4 !== peg$FAILED) {
-              if (input.substr(peg$currPos, 2) === peg$c5) {
-                s5 = peg$c5;
-                peg$currPos += 2;
-              } else {
-                s5 = peg$FAILED;
-                if (peg$silentFails === 0) {
-                  peg$fail(peg$c6);
-                }
-              }
-              if (s5 === peg$FAILED) {
-                if (input.charCodeAt(peg$currPos) === 60) {
-                  s5 = peg$c7;
-                  peg$currPos++;
-                } else {
-                  s5 = peg$FAILED;
-                  if (peg$silentFails === 0) {
-                    peg$fail(peg$c8);
-                  }
-                }
-                if (s5 === peg$FAILED) {
-                  if (input.substr(peg$currPos, 2) === peg$c9) {
-                    s5 = peg$c9;
-                    peg$currPos += 2;
-                  } else {
-                    s5 = peg$FAILED;
-                    if (peg$silentFails === 0) {
-                      peg$fail(peg$c10);
-                    }
-                  }
-                  if (s5 === peg$FAILED) {
-                    if (input.charCodeAt(peg$currPos) === 62) {
-                      s5 = peg$c11;
-                      peg$currPos++;
-                    } else {
-                      s5 = peg$FAILED;
-                      if (peg$silentFails === 0) {
-                        peg$fail(peg$c12);
-                      }
-                    }
-                    if (s5 === peg$FAILED) {
-                      if (input.charCodeAt(peg$currPos) === 61) {
-                        s5 = peg$c13;
-                        peg$currPos++;
-                      } else {
-                        s5 = peg$FAILED;
-                        if (peg$silentFails === 0) {
-                          peg$fail(peg$c14);
-                        }
-                      }
-                      if (s5 === peg$FAILED) {
-                        if (input.charCodeAt(peg$currPos) === 42) {
-                          s5 = peg$c15;
-                          peg$currPos++;
-                        } else {
-                          s5 = peg$FAILED;
-                          if (peg$silentFails === 0) {
-                            peg$fail(peg$c16);
-                          }
-                        }
-                        if (s5 === peg$FAILED) {
-                          if (input.charCodeAt(peg$currPos) === 33) {
-                            s5 = peg$c17;
-                            peg$currPos++;
-                          } else {
-                            s5 = peg$FAILED;
-                            if (peg$silentFails === 0) {
-                              peg$fail(peg$c18);
-                            }
-                          }
-                          if (s5 === peg$FAILED) {
-                            if (input.charCodeAt(peg$currPos) === 125) {
-                              s5 = peg$c19;
-                              peg$currPos++;
-                            } else {
-                              s5 = peg$FAILED;
-                              if (peg$silentFails === 0) {
-                                peg$fail(peg$c20);
-                              }
-                            }
-                            if (s5 === peg$FAILED) {
-                              if (input.charCodeAt(peg$currPos) === 123) {
-                                s5 = peg$c21;
-                                peg$currPos++;
-                              } else {
-                                s5 = peg$FAILED;
-                                if (peg$silentFails === 0) {
-                                  peg$fail(peg$c22);
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+            while (s4 !== peg$FAILED) {
+              s3.push(s4);
+              s4 = peg$currPos;
+              s5 = peg$parseLogicAction();
               if (s5 !== peg$FAILED) {
-                s6 = peg$parse_();
+                s6 = peg$parseTerm();
                 if (s6 !== peg$FAILED) {
-                  s7 = peg$parseWord();
-                  if (s7 !== peg$FAILED) {
-                    s4 = [s4, s5, s6, s7];
-                    s3 = s4;
-                  } else {
-                    peg$currPos = s3;
-                    s3 = peg$FAILED;
-                  }
+                  s5 = [s5, s6];
+                  s4 = s5;
                 } else {
-                  peg$currPos = s3;
-                  s3 = peg$FAILED;
+                  peg$currPos = s4;
+                  s4 = peg$FAILED;
                 }
               } else {
-                peg$currPos = s3;
-                s3 = peg$FAILED;
+                peg$currPos = s4;
+                s4 = peg$FAILED;
               }
-            } else {
-              peg$currPos = s3;
-              s3 = peg$FAILED;
             }
+          } else {
+            s3 = peg$FAILED;
           }
-        } else {
-          s2 = peg$FAILED;
-        }
-        if (s2 !== peg$FAILED) {
-          peg$savedPos = s0;
-          s1 = peg$c23(s1, s2);
-          s0 = s1;
-        } else {
-          peg$currPos = s0;
-          s0 = peg$FAILED;
-        }
-      } else {
-        peg$currPos = s0;
-        s0 = peg$FAILED;
-      }
-
-      return s0;
-    }
-
-    function peg$parseColumn() {
-      var s0, s1, s2, s3;
-
-      s0 = peg$currPos;
-      s1 = peg$parseQuote();
-      if (s1 !== peg$FAILED) {
-        s2 = peg$parseWord();
-        if (s2 !== peg$FAILED) {
-          s3 = peg$parseQuote();
           if (s3 !== peg$FAILED) {
-            s1 = [s1, s2, s3];
+            peg$savedPos = s0;
+            s1 = peg$c0(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -726,39 +405,384 @@ export const parser = function () {
       return s0;
     }
 
-    function peg$parseWord() {
-      var s0, s1, s2;
+    function peg$parseTerm() {
+      var s0;
+
+      s0 = peg$parseNonParametrizedTerm();
+      if (s0 === peg$FAILED) {
+        s0 = peg$parseInterColumnTerm();
+        if (s0 === peg$FAILED) {
+          s0 = peg$parseSimpleTerm();
+        }
+      }
+
+      return s0;
+    }
+
+    function peg$parseNonParametrizedTerm() {
+      var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
-      s1 = [];
-      s2 = peg$parseLetter();
-      if (s2 !== peg$FAILED) {
-        while (s2 !== peg$FAILED) {
-          s1.push(s2);
-          s2 = peg$parseLetter();
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parseColumn();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            if (input.substr(peg$currPos, 7) === peg$c1) {
+              s4 = peg$c1;
+              peg$currPos += 7;
+            } else {
+              s4 = peg$FAILED;
+              if (peg$silentFails === 0) {
+                peg$fail(peg$c2);
+              }
+            }
+            if (s4 === peg$FAILED) {
+              if (input.substr(peg$currPos, 10) === peg$c3) {
+                s4 = peg$c3;
+                peg$currPos += 10;
+              } else {
+                s4 = peg$FAILED;
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c4);
+                }
+              }
+            }
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                peg$savedPos = s0;
+                s1 = peg$c5(s2, s4);
+                s0 = s1;
+              } else {
+                peg$currPos = s0;
+                s0 = peg$FAILED;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
         }
       } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+
+      return s0;
+    }
+
+    function peg$parseInterColumnTerm() {
+      var s0, s1, s2, s3, s4, s5, s6, s7;
+
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parseColumn();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            s4 = peg$parseSearchAction();
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parseColumn();
+                if (s6 !== peg$FAILED) {
+                  s7 = peg$parse_();
+                  if (s7 !== peg$FAILED) {
+                    peg$savedPos = s0;
+                    s1 = peg$c6(s2, s4, s6);
+                    s0 = s1;
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$FAILED;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$FAILED;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$FAILED;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+
+      return s0;
+    }
+
+    function peg$parseSimpleTerm() {
+      var s0, s1, s2, s3, s4, s5, s6, s7;
+
+      s0 = peg$currPos;
+      s1 = peg$parse_();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parseColumn();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parse_();
+          if (s3 !== peg$FAILED) {
+            s4 = peg$parseSearchAction();
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parse_();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parseWord();
+                if (s6 !== peg$FAILED) {
+                  s7 = peg$parse_();
+                  if (s7 !== peg$FAILED) {
+                    peg$savedPos = s0;
+                    s1 = peg$c7(s2, s4, s6);
+                    s0 = s1;
+                  } else {
+                    peg$currPos = s0;
+                    s0 = peg$FAILED;
+                  }
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$FAILED;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$FAILED;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+
+      return s0;
+    }
+
+    function peg$parseLogicAction() {
+      var s0;
+
+      if (input.substr(peg$currPos, 2) === peg$c8) {
+        s0 = peg$c8;
+        peg$currPos += 2;
+      } else {
+        s0 = peg$FAILED;
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c9);
+        }
+      }
+      if (s0 === peg$FAILED) {
+        if (input.substr(peg$currPos, 2) === peg$c10) {
+          s0 = peg$c10;
+          peg$currPos += 2;
+        } else {
+          s0 = peg$FAILED;
+          if (peg$silentFails === 0) {
+            peg$fail(peg$c11);
+          }
+        }
+      }
+
+      return s0;
+    }
+
+    function peg$parseSearchAction() {
+      var s0;
+
+      if (input.substr(peg$currPos, 2) === peg$c12) {
+        s0 = peg$c12;
+        peg$currPos += 2;
+      } else {
+        s0 = peg$FAILED;
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c13);
+        }
+      }
+      if (s0 === peg$FAILED) {
+        if (input.charCodeAt(peg$currPos) === 60) {
+          s0 = peg$c14;
+          peg$currPos++;
+        } else {
+          s0 = peg$FAILED;
+          if (peg$silentFails === 0) {
+            peg$fail(peg$c15);
+          }
+        }
+        if (s0 === peg$FAILED) {
+          if (input.substr(peg$currPos, 2) === peg$c16) {
+            s0 = peg$c16;
+            peg$currPos += 2;
+          } else {
+            s0 = peg$FAILED;
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c17);
+            }
+          }
+          if (s0 === peg$FAILED) {
+            if (input.charCodeAt(peg$currPos) === 62) {
+              s0 = peg$c18;
+              peg$currPos++;
+            } else {
+              s0 = peg$FAILED;
+              if (peg$silentFails === 0) {
+                peg$fail(peg$c19);
+              }
+            }
+            if (s0 === peg$FAILED) {
+              if (input.charCodeAt(peg$currPos) === 61) {
+                s0 = peg$c20;
+                peg$currPos++;
+              } else {
+                s0 = peg$FAILED;
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c21);
+                }
+              }
+              if (s0 === peg$FAILED) {
+                if (input.charCodeAt(peg$currPos) === 42) {
+                  s0 = peg$c22;
+                  peg$currPos++;
+                } else {
+                  s0 = peg$FAILED;
+                  if (peg$silentFails === 0) {
+                    peg$fail(peg$c23);
+                  }
+                }
+                if (s0 === peg$FAILED) {
+                  if (input.charCodeAt(peg$currPos) === 33) {
+                    s0 = peg$c24;
+                    peg$currPos++;
+                  } else {
+                    s0 = peg$FAILED;
+                    if (peg$silentFails === 0) {
+                      peg$fail(peg$c25);
+                    }
+                  }
+                  if (s0 === peg$FAILED) {
+                    if (input.charCodeAt(peg$currPos) === 125) {
+                      s0 = peg$c26;
+                      peg$currPos++;
+                    } else {
+                      s0 = peg$FAILED;
+                      if (peg$silentFails === 0) {
+                        peg$fail(peg$c27);
+                      }
+                    }
+                    if (s0 === peg$FAILED) {
+                      if (input.charCodeAt(peg$currPos) === 123) {
+                        s0 = peg$c28;
+                        peg$currPos++;
+                      } else {
+                        s0 = peg$FAILED;
+                        if (peg$silentFails === 0) {
+                          peg$fail(peg$c29);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return s0;
+    }
+
+    function peg$parseColumn() {
+      var s0, s1, s2, s3, s4;
+
+      s0 = peg$currPos;
+      s1 = peg$currPos;
+      s2 = peg$parseQuote();
+      if (s2 !== peg$FAILED) {
+        s3 = peg$parseWord();
+        if (s3 !== peg$FAILED) {
+          s4 = peg$parseQuote();
+          if (s4 !== peg$FAILED) {
+            s2 = [s2, s3, s4];
+            s1 = s2;
+          } else {
+            peg$currPos = s1;
+            s1 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s1;
+          s1 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s1;
         s1 = peg$FAILED;
       }
       if (s1 !== peg$FAILED) {
         peg$savedPos = s0;
-        s1 = peg$c24(s1);
+        s1 = peg$c30(s1);
       }
       s0 = s1;
 
       return s0;
     }
 
-    function peg$parseLetter() {
+    function peg$parseWord() {
+      var s0, s1, s2;
+
+      s0 = peg$currPos;
+      s1 = [];
+      s2 = peg$parseLetters();
+      if (s2 !== peg$FAILED) {
+        while (s2 !== peg$FAILED) {
+          s1.push(s2);
+          s2 = peg$parseLetters();
+        }
+      } else {
+        s1 = peg$FAILED;
+      }
+      if (s1 !== peg$FAILED) {
+        peg$savedPos = s0;
+        s1 = peg$c31(s1);
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
+    function peg$parseLetters() {
       var s0;
 
-      if (peg$c25.test(input.charAt(peg$currPos))) {
+      if (peg$c32.test(input.charAt(peg$currPos))) {
         s0 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
         if (peg$silentFails === 0) {
-          peg$fail(peg$c26);
+          peg$fail(peg$c33);
         }
       }
 
@@ -769,24 +793,24 @@ export const parser = function () {
       var s0, s1;
 
       s0 = [];
-      if (peg$c27.test(input.charAt(peg$currPos))) {
+      if (peg$c34.test(input.charAt(peg$currPos))) {
         s1 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
         if (peg$silentFails === 0) {
-          peg$fail(peg$c28);
+          peg$fail(peg$c35);
         }
       }
       while (s1 !== peg$FAILED) {
         s0.push(s1);
-        if (peg$c27.test(input.charAt(peg$currPos))) {
+        if (peg$c34.test(input.charAt(peg$currPos))) {
           s1 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s1 = peg$FAILED;
           if (peg$silentFails === 0) {
-            peg$fail(peg$c28);
+            peg$fail(peg$c35);
           }
         }
       }
@@ -797,13 +821,13 @@ export const parser = function () {
     function peg$parseQuote() {
       var s0;
 
-      if (peg$c29.test(input.charAt(peg$currPos))) {
-        s0 = input.charAt(peg$currPos);
+      if (input.charCodeAt(peg$currPos) === 34) {
+        s0 = peg$c36;
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
         if (peg$silentFails === 0) {
-          peg$fail(peg$c30);
+          peg$fail(peg$c37);
         }
       }
 
@@ -874,12 +898,22 @@ class Filter {
     /**
      * @type {Object<string,function(string, string): Boolean>}
      */
+    this.__CHECK_SYNTAX = {
+      '[empty]': value => value == '',
+      '[nonempty]': value => value != ''
+    };
+
+    /**
+     * @type {Object<string,function(string, string): Boolean>}
+     */
     this.__SEARCH_SYNTAX = {
       '<': (value, expectation) => value < expectation,
       '<=': (value, expectation) => value <= expectation,
       '>': (value, expectation) => value > expectation,
       '>=': (value, expectation) => value >= expectation,
-      '=': (value, expectation) => value == expectation,
+      '=': (value, expectation) => {
+        return value == expectation;
+      },
       '*': (value, expectation) => {
         if (typeof value === 'string') {
           return value.indexOf(expectation) !== -1;
@@ -928,7 +962,7 @@ class Filter {
     var lastExpression = this.__parsedExpression;
     if (expression.length > 0) {
       try {
-        this.__parsedExpression = parser.parse(expression, { 'startRule': 'Expression' });
+        this.__parsedExpression = parser.parse(expression, { 'startRule': 'Query' });
       } catch (e) {
         this.lastError = e.message;
       }
@@ -947,6 +981,14 @@ class Filter {
     return term['col'] && term['act'] && term['exp'];
   }
 
+  static __isInterColumnTermValid(term) {
+    return term['col1'] && term['col2'] && term['act'];
+  }
+
+  static __isNonArgumentedTermValid(term) {
+    return term['col'] && term['check'];
+  }
+
   static __isExpressionValid(expression) {
     return expression['l'] && expression['r'] && expression['op'];
   }
@@ -956,7 +998,30 @@ class Filter {
     return rows.filter(row => {
       let value = row.getValueByColumnName(columnName);
       if (value) {
-        return this.__SEARCH_SYNTAX[action](value, expectation);
+        return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
+      }
+      return true;
+    });
+  }
+
+  __reduceInterColumnTerm(rows, term) {
+    let { col1: firstColumnName, col2: secondColumnName, act: action } = term;
+    return rows.filter(row => {
+      let firstValue = row.getValueByColumnName(firstColumnName);
+      let secondValue = row.getValueByColumnName(secondColumnName);
+      if (firstValue && secondValue) {
+        return this.__SEARCH_SYNTAX[action](firstValue.toString(), secondValue.toString());
+      }
+      return true;
+    });
+  }
+
+  __reduceNonArgumentedTerm(rows, term) {
+    let { col: columnName, check } = term;
+    return rows.filter(row => {
+      let value = row.getValueByColumnName(columnName);
+      if (value) {
+        return this.__CHECK_SYNTAX[check](value.toString());
       }
       return true;
     });
@@ -976,6 +1041,13 @@ class Filter {
     }
     if (Filter.__isTermValid(tree)) {
       return this.__reduceTerm(rows, tree);
+    }
+    if (Filter.__isInterColumnTermValid(tree)) {
+      return this.__reduceInterColumnTerm(rows, tree);
+    }
+
+    if (Filter.__isNonArgumentedTermValid(tree)) {
+      return this.__reduceNonArgumentedTerm(rows, tree);
     }
   }
 
@@ -997,6 +1069,7 @@ class Filter {
     });
   }
 }
+
 class Row {
   /**
    * @param key {String}
@@ -1086,6 +1159,11 @@ class Table {
     return Math.ceil(Object.keys(this.exportFilteredRows(this.getRowsArray())).length / this.pageSize);
   }
 
+  setPageSize(pageSize) {
+    this.pageSize = pageSize;
+    return this;
+  }
+
   resetColumnOrdering() {
     while (this.columns.pop() != undefined) {
       this.columns.pop();
@@ -1102,14 +1180,25 @@ class Table {
     for (let idx = 0; idx < this.columns.length; idx++) {
       if (this.columns[idx].name === columnName) {
         if (side === moveSide.RIGHT) {
-          const buff = this.columns[idx + 1];
-          this.columns[idx + 1] = this.columns[idx];
-          this.columns[idx] = buff;
+          for (let visibleIdx = 1; visibleIdx + idx < this.columns.length; visibleIdx++) {
+            if (this.columns[idx + visibleIdx].visibility) {
+              const buff = this.columns[idx + visibleIdx];
+              this.columns[idx + visibleIdx] = this.columns[idx];
+              this.columns[idx] = buff;
+
+              break;
+            }
+          }
           break;
         } else if (side === moveSide.LEFT) {
-          const buff = this.columns[idx - 1];
-          this.columns[idx - 1] = this.columns[idx];
-          this.columns[idx] = buff;
+          for (let visibleIdx = 1; idx - visibleIdx >= 0; visibleIdx++) {
+            if (this.columns[idx - visibleIdx].visibility) {
+              const buff = this.columns[idx - visibleIdx];
+              this.columns[idx - visibleIdx] = this.columns[idx];
+              this.columns[idx] = buff;
+              break;
+            }
+          }
           break;
         }
       }
@@ -1276,25 +1365,24 @@ class ColumnResizerView extends React.Component {
   render() {
 
     let { handleWidthChange } = this.props;
-
     return React.createElement(
-      'th',
-      {
-        style: this.generateStyles(),
-        onDragStart: e => {
-          this.updateState(true, e.clientX - 14);
-        },
-        onDragEnd: e => {
-          this.updateState(false, e.clientX - 14);
-        },
-        onDrag: e => {
-          if (this.state.drag && e.clientX !== 0) {
-            this.setXPosition(e.clientX);
-            handleWidthChange(e.clientX, this.state.xPosition);
-          }
-        } },
-      React.createElement('img', { style: this.imgStyle, width: '25', height: '12', title: '', alt: '',
-        src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg==' })
+        'th',
+        {
+          style: this.generateStyles(),
+          onDragStart: e => {
+            this.updateState(true, e.clientX - 14);
+          },
+          onDragEnd: e => {
+            this.updateState(false, e.clientX - 14);
+          },
+          onDrag: e => {
+            if (this.state.drag && e.clientX !== 0) {
+              this.setXPosition(e.clientX);
+              handleWidthChange(e.clientX, this.state.xPosition);
+            }
+          } },
+        React.createElement('img', { style: this.imgStyle, width: '25', height: '12', title: '', alt: '',
+          src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg==' })
     );
   }
 }
@@ -1309,29 +1397,30 @@ class ColumnsVisibility extends React.Component {
     let { onChange, columns } = this.props;
 
     return React.createElement(
-      'div',
-      { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
-      React.createElement(
-        'label',
-        { className: 'control-label' },
-        'Hide columns'
-      ),
-      React.createElement('br', null),
-      columns.map(column => {
-        return React.createElement(
-          'label',
-          { className: 'checkbox-inline', key: column.name },
-          React.createElement('input', { type: 'checkbox',
-            value: '',
-            onChange: evt => {
-              onChange(column.name, !evt.target.checked);
-            } }),
-          column.name
-        );
-      })
+        'div',
+        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'Hide columns'
+        ),
+        React.createElement('br', null),
+        columns.map(column => {
+          return React.createElement(
+              'label',
+              { className: 'checkbox-inline', key: column.name },
+              React.createElement('input', { type: 'checkbox',
+                value: '',
+                onChange: evt => {
+                  onChange(column.name, !evt.target.checked);
+                } }),
+              column.name
+          );
+        })
     );
   }
 }
+
 export const moveSide = {
   RIGHT: 'right',
   LEFT: 'left'
@@ -1340,6 +1429,7 @@ class ColumnView extends React.Component {
   constructor(props) {
     super(props);
   }
+
   orderingIconClass(columnName, orderingColumnName) {
     if (orderingColumnName !== columnName) {
       return "glyphicon glyphicon-sort";
@@ -1351,16 +1441,17 @@ class ColumnView extends React.Component {
       return "glyphicon glyphicon-sort";
     }
   }
+
   render() {
     let {
-      column,
-      orderedByColumn,
-      columnOrderingHandler,
-      notLast,
-      width,
-      first,
-      last,
-      columnMoveHandler
+        column,
+        orderedByColumn,
+        columnOrderingHandler,
+        notLast,
+        width,
+        first,
+        last,
+        columnMoveHandler
     } = this.props;
 
     const style = {};
@@ -1373,91 +1464,106 @@ class ColumnView extends React.Component {
       style['width'] = width + 'px';
     }
     return React.createElement(
-      'th',
-      { key: column.name, style: style, className: column.inFilterExpression ? "active" : "" },
-      !first ? React.createElement('span', { className: 'glyphicon glyphicon-arrow-left', onClick: () => columnMoveHandler(moveSide.LEFT, column.name) }) : null,
-      '\xA0',
-      React.createElement('span', { className: this.orderingIconClass(column.name, orderedByColumn), onClick: () => columnOrderingHandler(column.name) }),
-      '\xA0',
-      column.name,
-      ' ',
-      !last && notLast ? React.createElement('span', { style: {
+        'th',
+        { key: column.name, style: style, className: column.inFilterExpression ? "active" : "" },
+        !first ? React.createElement('span', { className: 'glyphicon glyphicon-arrow-left',
+          onClick: () => columnMoveHandler(moveSide.LEFT, column.name) }) : null,
+        '\xA0',
+        React.createElement('span', { className: this.orderingIconClass(column.name, orderedByColumn),
+          onClick: () => columnOrderingHandler(column.name) }),
+        '\xA0',
+        column.name,
+        ' ',
+        !last && notLast ? React.createElement('span', { style: {
           float: 'right',
           marginRight: '-15px',
           marginTop: '1px'
-        }, className: 'glyphicon glyphicon-arrow-right', onClick: () => columnMoveHandler(moveSide.RIGHT, column.name) }) : null
+        }, className: 'glyphicon glyphicon-arrow-right',
+          onClick: () => columnMoveHandler(moveSide.RIGHT, column.name) }) : null
     );
   }
 }
+
 class FilterView extends React.Component {
   constructor(props) {
     super(props);
   }
+
   render() {
     let { table, filterHandler, columnsVisibilityHandler, resetOrdering, resetColumnOrdering } = this.props;
     return React.createElement(
-      'div',
-      { className: 'panel-group', id: 'table-filtering-accordion', role: 'tablist', 'aria-multiselectable': 'true' },
-      React.createElement(
         'div',
-        { className: 'panel panel-default' },
+        { className: 'panel-group', id: 'table-filtering-accordion',
+          role: 'tablist', 'aria-multiselectable': 'true' },
         React.createElement(
-          'div',
-          { className: 'panel-heading', role: 'tab', id: 'headingFiltering' },
-          React.createElement(
-            'a',
-            { className: 'collapsed', role: 'button', 'data-toggle': 'collapse', 'data-parent': '#accordion', href: '#collapseFiltering', 'aria-expanded': 'false', 'aria-controls': 'collapseFiltering' },
-            React.createElement(
-              'h4',
-              { className: 'panel-title' },
-              'Table Filtering'
-            )
-          )
-        ),
-        React.createElement(
-          'div',
-          { id: 'collapseFiltering', className: 'panel-collapse collapse', role: 'tabpanel', 'aria-labelledby': 'headingFiltering' },
-          React.createElement(
             'div',
-            { className: 'panel-body' },
-            React.createElement(QueryInput, { onChange: filterHandler, query: table.getFilterExpression(), error: table.getFilterError() }),
-            React.createElement(ColumnsVisibility, { columns: table.columns, onChange: columnsVisibilityHandler }),
+            { className: 'panel panel-default' },
             React.createElement(
-              'div',
-              { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
-              React.createElement(
-                'label',
-                { className: 'control-label' },
-                'Reset'
-              ),
-              React.createElement('br', null),
-              React.createElement(
                 'div',
-                { className: 'row' },
+                { className: 'panel-heading', role: 'tab', id: 'headingFiltering' },
                 React.createElement(
-                  'div',
-                  { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
-                  React.createElement(
-                    'button',
-                    { type: 'button', className: 'btn btn-danger', onClick: resetOrdering },
-                    'Ordering by value'
-                  )
-                ),
-                React.createElement('div', { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' }),
-                React.createElement(
-                  'div',
-                  { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
-                  React.createElement(
-                    'button',
-                    { type: 'button', className: 'btn btn-danger', onClick: resetColumnOrdering },
-                    'Column position'
-                  )
+                    'a',
+                    { className: 'collapsed', role: 'button', 'data-toggle': 'collapse',
+                      'data-parent': '#accordion', href: '#collapseFiltering',
+                      'aria-expanded': 'false', 'aria-controls': 'collapseFiltering' },
+                    React.createElement(
+                        'h4',
+                        { className: 'panel-title' },
+                        'Table Filtering'
+                    )
                 )
-              )
+            ),
+            React.createElement(
+                'div',
+                { id: 'collapseFiltering', className: 'panel-collapse collapse',
+                  role: 'tabpanel', 'aria-labelledby': 'headingFiltering' },
+                React.createElement(
+                    'div',
+                    { className: 'panel-body' },
+                    React.createElement(QueryInput, { onChange: filterHandler,
+                      query: table.getFilterExpression(),
+                      error: table.getFilterError() }),
+                    React.createElement(ColumnsVisibility, { columns: table.columns,
+                      onChange: columnsVisibilityHandler }),
+                    React.createElement(
+                        'div',
+                        {
+                          className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+                        React.createElement(
+                            'label',
+                            { className: 'control-label' },
+                            'Reset'
+                        ),
+                        React.createElement('br', null),
+                        React.createElement(
+                            'div',
+                            { className: 'row' },
+                            React.createElement(
+                                'div',
+                                { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
+                                React.createElement(
+                                    'button',
+                                    { type: 'button', className: 'btn btn-danger',
+                                      onClick: resetOrdering },
+                                    'Ordering by value'
+                                )
+                            ),
+                            React.createElement('div', { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' }),
+                            React.createElement(
+                                'div',
+                                { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
+                                React.createElement(
+                                    'button',
+                                    { type: 'button', className: 'btn btn-danger',
+                                      onClick: resetColumnOrdering },
+                                    'Column position'
+                                )
+                            )
+                        )
+                    )
+                )
             )
-          )
         )
-      )
     );
   }
 }
@@ -1486,6 +1592,7 @@ class Header extends React.Component {
   }
 
   handleWidthChange(currentX, initialX, leftColumn, rightColumn) {
+
     const diff = initialX - currentX;
 
     const newState = Object.assign({}, this.state.columnsWidth);
@@ -1585,40 +1692,41 @@ class Header extends React.Component {
     let { columnsWidth } = this.state;
 
     return React.createElement(
-      'thead',
-      null,
-      React.createElement(
-        'tr',
+        'thead',
         null,
-        columns.filter(column => column.visibility).map((column, idx, collection) => {
+        React.createElement(
+            'tr',
+            null,
+            columns.filter(column => column.visibility).map((column, idx, collection) => {
 
-          const notLast = idx < collection.length - 1;
-          const last = idx === collection.length;
-          const first = idx === 0;
+              const notLast = idx < collection.length - 1;
+              const last = idx === collection.length;
+              const first = idx === 0;
 
-          let result = [React.createElement(ColumnView, {
-            column: column,
-            orderedByColumn: orderingColumn,
-            notLast: notLast,
-            last: last,
-            first: first,
-            width: columnsWidth[column.name],
-            order: this.state.order,
-            columnMoveHandler: columnMoveHandler,
-            columnOrderingHandler: columnName => columnOrderingHandler(columnName, this.toggleOrdering(columnName)) })];
+              let result = [React.createElement(ColumnView, {
+                column: column,
+                orderedByColumn: orderingColumn,
+                notLast: notLast,
+                last: last,
+                first: first,
+                width: columnsWidth[column.name],
+                order: this.state.order,
+                columnMoveHandler: columnMoveHandler,
+                columnOrderingHandler: columnName => columnOrderingHandler(columnName, this.toggleOrdering(columnName)) })];
 
-          if (notLast) {
-            result.push(React.createElement(ColumnResizerView, {
-              handleWidthChange: (curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)
-            }));
-          }
+              if (notLast) {
+                result.push(React.createElement(ColumnResizerView, {
+                  handleWidthChange: (curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)
+                }));
+              }
 
-          return result;
-        })
-      )
+              return result;
+            })
+        )
     );
   }
 }
+
 class PaginationView extends React.Component {
   constructor(props) {
     super(props);
@@ -1628,57 +1736,117 @@ class PaginationView extends React.Component {
     let pages = [];
     for (let counter = 1; counter < table.getMaxPage() + 1; counter++) {
       pages.push(React.createElement(
-        'li',
-        { key: counter, className: counter === table.currentPage ? 'active' : '' },
-        React.createElement(
-          'a',
-          { onClick: () => handlePageSet(counter) },
-          counter,
-          React.createElement('span', { className: 'sr-only' })
-        )
+          'li',
+          { key: counter, className: counter === table.currentPage ? 'active' : '' },
+          React.createElement(
+              'a',
+              { onClick: () => handlePageSet(counter) },
+              counter,
+              React.createElement('span', { className: 'sr-only' })
+          )
       ));
     }
     return pages;
   }
+
   render() {
-    let { table, handlePageSet } = this.props;
+    let {
+        table,
+        handlePageSet,
+        setPageSize
+    } = this.props;
     return React.createElement(
-      'nav',
-      { 'aria-label': '...' },
-      React.createElement(
-        'ul',
-        { className: 'pagination' },
+        'div',
+        { className: 'row' },
         React.createElement(
-          'li',
-          { className: table.currentPage === 1 ? 'disabled' : '' },
-          React.createElement(
-            'a',
-            { 'aria-label': 'Previous', onClick: () => handlePageSet(1) },
+            'div',
+            { className: 'col-sm-2 col-md-2 col-lg-2 col-xs-2' },
             React.createElement(
-              'span',
-              { 'aria-hidden': 'true' },
-              '\xAB'
+                'div',
+                { className: 'form-group' },
+                React.createElement(
+                    'label',
+                    { htmlFor: 'table-page-size-selec' },
+                    'Page size:'
+                ),
+                React.createElement(
+                    'select',
+                    {
+                      className: 'form-control',
+                      id: 'table-page-size-select',
+                      value: table.pageSize,
+                      onChange: evt => {
+                        setPageSize(evt.target.value);
+                      } },
+                    React.createElement(
+                        'option',
+                        { value: '10' },
+                        '10'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: '25' },
+                        '25'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: '50' },
+                        '50'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: '100' },
+                        '100'
+                    )
+                )
             )
-          )
         ),
-        this.renderPageCounter(table, handlePageSet),
         React.createElement(
-          'li',
-          { className: table.currentPage === table.getMaxPage() ? 'disabled' : '' },
-          React.createElement(
-            'a',
-            { 'aria-label': 'Next', onClick: () => handlePageSet(table.getMaxPage()) },
+            'div',
+            { className: 'col-sm-10 col-md-10 col-lg-10 col-xs-10' },
             React.createElement(
-              'span',
-              { 'aria-hidden': 'true' },
-              '\xBB'
+                'nav',
+                { 'aria-label': '...', style: { paddingTop: '5px' } },
+                React.createElement(
+                    'ul',
+                    { className: 'pagination' },
+                    React.createElement(
+                        'li',
+                        { className: table.currentPage === 1 ? 'disabled' : '' },
+                        React.createElement(
+                            'a',
+                            { 'aria-label': 'Previous', onClick: () => handlePageSet(1) },
+                            React.createElement(
+                                'span',
+                                { 'aria-hidden': 'true' },
+                                '\xAB'
+                            )
+                        )
+                    ),
+                    this.renderPageCounter(table, handlePageSet),
+                    React.createElement(
+                        'li',
+                        { className: table.currentPage < table.getMaxPage() ? '' : 'disabled' },
+                        React.createElement(
+                            'a',
+                            { 'aria-label': 'Next',
+                              onClick: () => {
+                                handlePageSet(table.getMaxPage());
+                              } },
+                            React.createElement(
+                                'span',
+                                { 'aria-hidden': 'true' },
+                                '\xBB'
+                            )
+                        )
+                    )
+                )
             )
-          )
         )
-      )
     );
   }
 }
+
 class QueryInput extends React.Component {
   constructor(props) {
     super(props);
@@ -1700,23 +1868,24 @@ class QueryInput extends React.Component {
     let hasError = !!error;
 
     return React.createElement(
-      'div',
-      {
-        className: QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError) },
-      React.createElement(
-        'label',
-        { htmlFor: 'tableViewFilterQuery' },
-        'Filter Query'
-      ),
-      React.createElement('input', {
-        id: 'tableViewFilterQuery',
-        type: 'text',
-        className: 'form-control',
-        onChange: evt => onChange(evt.target.value),
-        value: query })
+        'div',
+        {
+          className: QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError) },
+        React.createElement(
+            'label',
+            { htmlFor: 'tableViewFilterQuery' },
+            'Filter Query'
+        ),
+        React.createElement('input', {
+          id: 'tableViewFilterQuery',
+          type: 'text',
+          className: 'form-control',
+          onChange: evt => onChange(evt.target.value),
+          value: query })
     );
   }
 }
+
 class RowView extends React.Component {
   constructor(props) {
     super(props);
@@ -1730,16 +1899,17 @@ class RowView extends React.Component {
     let row = this.props.row;
 
     return React.createElement(
-      'tr',
-      null,
-      row.columns.map(column => column.visibility ? React.createElement(
-        'td',
-        { colSpan: '2' },
-        row.getValue(column)
-      ) : null)
+        'tr',
+        null,
+        row.columns.map(column => column.visibility ? React.createElement(
+            'td',
+            { colSpan: '2' },
+            row.getValue(column)
+        ) : null)
     );
   }
 }
+
 class TableView extends React.Component {
   constructor(props) {
     super(props);
@@ -1769,41 +1939,52 @@ class TableView extends React.Component {
       td: this.state.td.setColumnVisibility(column, value)
     });
   }
+
   columnOrderingHandler(columnName, order) {
     this.setState({
       td: this.state.td.setOrdering(columnName, order)
     });
   }
+
   resetOrdering() {
     this.setState({
       td: this.state.td.setOrdering(null, null)
     });
   }
+
   bootstrapTable(data, filterQueryExporter, filterQuery, pageSize) {
     this.bootstrapped = true;
     this.setState({
       td: new Table(data.columns, data.rows, filterQueryExporter, filterQuery, pageSize)
     });
   }
+
   updateTable(data) {
     this.setState({
       td: this.state.td.updateRows(data.rows)
     });
   }
+
   componentWillMount() {
     this.setState({ td: Table.empty() });
   }
+
+  setPageSize(size) {
+    this.setState({
+      td: this.state.td.setPageSize(size)
+    });
+  }
+
   componentDidMount() {
     let {
-      socket,
-      eventName,
-      filterQueryExporter = expression => expression,
-      filterQuery = "",
-      pageSize = 50
+        socket,
+        eventName,
+        filterQueryExporter = expression => expression,
+        filterQuery = ""
     } = this.props;
     socket.on(eventName, data => {
       if (data && data.columns && data.rows && !this.bootstrapped) {
-        this.bootstrapTable(data, filterQueryExporter, filterQuery, pageSize);
+        this.bootstrapTable(data, filterQueryExporter, filterQuery, 10);
       } else if (data && data.rows) {
         this.updateTable(data);
       }
@@ -1814,36 +1995,41 @@ class TableView extends React.Component {
     let { td: table } = this.state;
     if (table.columns.length > 0) {
       return React.createElement(
-        'div',
-        { className: 'container-fluid' },
-        React.createElement(FilterView, {
-          table: table,
-          filterHandler: expr => this.filterHandler(expr),
-          columnsVisibilityHandler: (column, value) => this.columnsVisibilityHandler(column, value),
-          resetOrdering: () => this.resetOrdering(),
-          resetColumnOrdering: () => this.columnMoveReset() }),
-        React.createElement(PaginationView, { table: table, handlePageSet: pageNum => this.handlePageSet(pageNum) }),
-        React.createElement(
-          'table',
-          { className: 'table table-responsive table-bordered' },
-          React.createElement(Header, {
-            columnMoveHandler: (s, c) => {
-              this.columnMoveHandler(s, c);
-            },
-            columns: table.columns,
-            visibleColumns: table.columns.filter(col => col.visibility),
-            columnOrderingHandler: (columnName, order) => this.columnOrderingHandler(columnName, order),
-            orderingColumn: table.ordering.column }),
+          'div',
+          { className: 'container-fluid' },
+          React.createElement(FilterView, {
+            table: table,
+            filterHandler: expr => this.filterHandler(expr),
+            columnsVisibilityHandler: (column, value) => this.columnsVisibilityHandler(column, value),
+            resetOrdering: () => this.resetOrdering(),
+            resetColumnOrdering: () => this.columnMoveReset() }),
+          React.createElement(PaginationView, { table: table,
+            handlePageSet: pageNum => this.handlePageSet(pageNum),
+            setPageSize: pageSize => this.setPageSize(pageSize) }),
           React.createElement(
-            'tbody',
-            null,
-            table.exportRows().map(row => React.createElement(RowView, { key: row.key, row: row }))
-          )
-        ),
-        React.createElement(PaginationView, { table: table, handlePageSet: pageNum => this.handlePageSet(pageNum) })
+              'table',
+              { className: 'table table-responsive table-bordered' },
+              React.createElement(Header, {
+                columnMoveHandler: (s, c) => {
+                  this.columnMoveHandler(s, c);
+                },
+                columns: table.columns,
+                visibleColumns: table.columns.filter(col => col.visibility),
+                columnOrderingHandler: (columnName, order) => this.columnOrderingHandler(columnName, order),
+                orderingColumn: table.ordering.column }),
+              React.createElement(
+                  'tbody',
+                  null,
+                  table.exportRows().map(row => React.createElement(RowView, { key: row.key,
+                    row: row }))
+              )
+          ),
+          React.createElement(PaginationView, { table: table,
+            handlePageSet: pageNum => this.handlePageSet(pageNum) })
       );
     }
     return null;
   }
 }
+
 export default TableView;

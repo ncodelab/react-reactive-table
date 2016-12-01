@@ -10,12 +10,12 @@ let socket = require('socket.io-client')('http://localhost:3000');
 
 render(
     <div className="container-fluid">
-        <TableView
-            socket={socket}
-            eventName="event"
-            filterQuery=''
-            filterQueryExporter={(expr) => console.log(expr)}
-            pageSize={20}/>
+      <TableView
+          socket={socket}
+          eventName="event"
+          filterQuery=''
+          filterQueryExporter={(expr) => console.log(expr)}
+          pageSize={20}/>
     </div>,
     document.getElementById('application')
 );

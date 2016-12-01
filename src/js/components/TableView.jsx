@@ -33,41 +33,52 @@ class TableView extends React.Component {
       td: this.state.td.setColumnVisibility(column, value)
     });
   }
+
   columnOrderingHandler(columnName, order) {
     this.setState({
       td: this.state.td.setOrdering(columnName, order)
     });
   }
+
   resetOrdering() {
     this.setState({
       td: this.state.td.setOrdering(null, null)
     });
   }
+
   bootstrapTable(data, filterQueryExporter, filterQuery, pageSize) {
     this.bootstrapped = true;
     this.setState({
       td: new Table(data.columns, data.rows, filterQueryExporter, filterQuery, pageSize)
     });
   }
+
   updateTable(data) {
     this.setState({
       td: this.state.td.updateRows(data.rows)
     });
   }
+
   componentWillMount() {
     this.setState({td: Table.empty()});
   }
+
+  setPageSize(size) {
+    this.setState({
+      td: this.state.td.setPageSize(size)
+    })
+  }
+
   componentDidMount() {
     let {
-      socket,
-      eventName,
-      filterQueryExporter = (expression) => expression,
-      filterQuery = "",
-      pageSize = 50
+        socket,
+        eventName,
+        filterQueryExporter = (expression) => expression,
+        filterQuery = ""
     } = this.props;
     socket.on(eventName, (data) => {
       if (data && data.columns && data.rows && !this.bootstrapped) {
-        this.bootstrapTable(data, filterQueryExporter, filterQuery, pageSize);
+        this.bootstrapTable(data, filterQueryExporter, filterQuery, 10);
       } else if (data && data.rows) {
         this.updateTable(data);
       }
@@ -78,29 +89,33 @@ class TableView extends React.Component {
     let {td: table} = this.state;
     if (table.columns.length > 0) {
       return (
-        <div className="container-fluid">
-          <FilterView
-            table={table}
-            filterHandler={(expr) => this.filterHandler(expr)}
-            columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
-            resetOrdering={() => this.resetOrdering()}
-            resetColumnOrdering={() => this.columnMoveReset()}/>
-          <PaginationView table={table} handlePageSet={(pageNum) => this.handlePageSet(pageNum)}/>
-          <table className="table table-responsive table-bordered">
-            <Header
-              columnMoveHandler={(s, c) => {
-              this.columnMoveHandler(s, c)
-            }}
-              columns={table.columns}
-              visibleColumns={table.columns.filter(col => col.visibility)}
-              columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
-              orderingColumn={table.ordering.column}/>
-            <tbody>
-              {table.exportRows().map(row => <RowView key={row.key} row={row}/>)}
-            </tbody>
-          </table>
-          <PaginationView table={table} handlePageSet={(pageNum) => this.handlePageSet(pageNum)}/>
-        </div>
+          <div className="container-fluid">
+            <FilterView
+                table={table}
+                filterHandler={(expr) => this.filterHandler(expr)}
+                columnsVisibilityHandler={(column, value) => this.columnsVisibilityHandler(column, value)}
+                resetOrdering={() => this.resetOrdering()}
+                resetColumnOrdering={() => this.columnMoveReset()}/>
+            <PaginationView table={table}
+                            handlePageSet={(pageNum) => this.handlePageSet(pageNum)}
+                            setPageSize={(pageSize) => this.setPageSize(pageSize)}/>
+            <table className="table table-responsive table-bordered">
+              <Header
+                  columnMoveHandler={(s, c) => {
+                    this.columnMoveHandler(s, c)
+                  }}
+                  columns={table.columns}
+                  visibleColumns={table.columns.filter(col => col.visibility)}
+                  columnOrderingHandler={(columnName, order) => this.columnOrderingHandler(columnName, order)}
+                  orderingColumn={table.ordering.column}/>
+              <tbody>
+              {table.exportRows().map(row => <RowView key={row.key}
+                                                      row={row}/>)}
+              </tbody>
+            </table>
+            <PaginationView table={table}
+                            handlePageSet={(pageNum) => this.handlePageSet(pageNum)}/>
+          </div>
       )
     }
     return (null);

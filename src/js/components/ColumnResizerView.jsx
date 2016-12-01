@@ -55,21 +55,20 @@ class ColumnResizerView extends React.Component {
   render() {
 
     let {handleWidthChange} = this.props;
-
     return (<th
-        style={this.generateStyles()}
-        onDragStart={(e) => {
-          this.updateState(true, e.clientX - 14);
-        }}
-        onDragEnd={(e) => {
-          this.updateState(false, e.clientX - 14);
-        }}
-        onDrag={(e) => {
-          if (this.state.drag && e.clientX !== 0) {
-            this.setXPosition(e.clientX);
-            handleWidthChange(e.clientX, this.state.xPosition);
-          }
-        }}>
+                style={this.generateStyles()}
+                onDragStart={(e) => {
+                  this.updateState(true, e.clientX - 14);
+                }}
+                onDragEnd={(e) => {
+                  this.updateState(false, e.clientX - 14);
+                }}
+                onDrag={(e) => {
+                  if (this.state.drag && e.clientX !== 0) {
+                    this.setXPosition(e.clientX);
+                    handleWidthChange(e.clientX, this.state.xPosition);
+                  }
+                }}>
       <img style={this.imgStyle} width="25" height="12" title="" alt=""
            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg=="/>
     </th>);
