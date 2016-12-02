@@ -1609,13 +1609,32 @@ class ColumnView extends React.Component {
   };
 }
 
+
 class FilterView extends React.Component {
   constructor(props) {
     super(props);
   }
 
+
+  componentWillMount()  {
+    this.setState({query: this.props.table.getFilterExpression()});
+  }
+
+  mutateQuery(query) {
+    this.setState({query});
+  }
+
+  applyQuery() {
+    this.props.filterHandler(this.state.query);
+  }
+
+
+
   render() {
-    let {table, filterHandler, columnsVisibilityHandler, resetOrdering, resetColumnOrdering} = this.props;
+    let {table, columnsVisibilityHandler, resetOrdering, resetColumnOrdering} = this.props;
+
+    let {query} = this.state;
+
     return (
         <div className="panel-group" id="table-filtering-accordion"
              role="tablist" aria-multiselectable="true">
@@ -1633,12 +1652,25 @@ class FilterView extends React.Component {
                  role="tabpanel" aria-labelledby="headingFiltering">
               <div className="panel-body">
                 <QueryInput table={table}
-                            onChange={filterHandler}
-                            query={table.getFilterExpression()}
+                            onChange={(value) => this.mutateQuery(value)}
+                            query={query}
                             error={table.getFilterError()}/>
+
+                <div
+                    className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
+                  <div className="row">
+                    <div className="col-sm-1 col-md-1 col-lg-1 col-xs-1">
+                      <button type="button" className="btn btn-success"
+                              onClick={() => this.applyQuery()}>
+                        Apply query
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
                 <ColumnsVisibility columns={table.columns}
                                    onChange={columnsVisibilityHandler}/>
+
                 <div
                     className="form-group col-sm-12 col-md-12 col-lg-12 col-xs-12">
                   <label className="control-label">Reset</label>

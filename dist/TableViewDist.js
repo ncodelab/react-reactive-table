@@ -1422,21 +1422,25 @@ class ColumnResizerView extends React.Component {
   render() {
 
     let { handleWidthChange } = this.props;
-    return React.createElement('th', {
-      style: this.generateStyles(),
-      onDragStart: e => {
-        this.updateState(true, e.clientX - 14);
-      },
-      onDragEnd: e => {
-        this.updateState(false, e.clientX - 14);
-      },
-      onDrag: e => {
-        if (this.state.drag && e.clientX !== 0) {
-          this.setXPosition(e.clientX);
-          handleWidthChange(e.clientX, this.state.xPosition);
-        }
-      } }, React.createElement('img', { style: this.imgStyle, width: '25', height: '12', title: '', alt: '',
-      src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg==' }));
+    return React.createElement(
+        'th',
+        {
+          style: this.generateStyles(),
+          onDragStart: e => {
+            this.updateState(true, e.clientX - 14);
+          },
+          onDragEnd: e => {
+            this.updateState(false, e.clientX - 14);
+          },
+          onDrag: e => {
+            if (this.state.drag && e.clientX !== 0) {
+              this.setXPosition(e.clientX);
+              handleWidthChange(e.clientX, this.state.xPosition);
+            }
+          } },
+        React.createElement('img', { style: this.imgStyle, width: '25', height: '12', title: '', alt: '',
+          src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAMCAYAAACX8hZLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AsYDjAk0TYAawAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAT0lEQVQ4y7XUSwoAIAhFUe/+F12DIIIIfz0HkTo4BSK2Ypgu4EgUEPsQQVyXzxDP5BOEW2hChItFiHQjCVFuBiFaLwhAWPebDoRwS+SnbgKAYwwLsTvjuQAAAABJRU5ErkJggg==' })
+    );
   }
 }
 
@@ -1449,13 +1453,28 @@ class ColumnsVisibility extends React.Component {
 
     let { onChange, columns } = this.props;
 
-    return React.createElement('div', { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' }, React.createElement('label', { className: 'control-label' }, 'Hide columns'), React.createElement('br', null), columns.map(column => {
-      return React.createElement('label', { className: 'checkbox-inline', key: column.name }, React.createElement('input', { type: 'checkbox',
-        value: '',
-        onChange: evt => {
-          onChange(column.name, !evt.target.checked);
-        } }), column.name);
-    }));
+    return React.createElement(
+        'div',
+        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'Hide columns'
+        ),
+        React.createElement('br', null),
+        columns.map(column => {
+          return React.createElement(
+              'label',
+              { className: 'checkbox-inline', key: column.name },
+              React.createElement('input', { type: 'checkbox',
+                value: '',
+                onChange: evt => {
+                  onChange(column.name, !evt.target.checked);
+                } }),
+              column.name
+          );
+        })
+    );
   }
 }
 
@@ -1501,14 +1520,24 @@ class ColumnView extends React.Component {
     if (width) {
       style['width'] = width + 'px';
     }
-    return React.createElement('th', { key: column.name, style: style, className: column.inFilterExpression ? "active" : "" }, !first ? React.createElement('span', { className: 'glyphicon glyphicon-arrow-left',
-      onClick: () => columnMoveHandler(moveSide.LEFT, column.name) }) : null, '\xA0', React.createElement('span', { className: this.orderingIconClass(column.name, orderedByColumn),
-      onClick: () => columnOrderingHandler(column.name) }), '\xA0', column.name, ' ', !last && notLast ? React.createElement('span', { style: {
-      float: 'right',
-      marginRight: '-15px',
-      marginTop: '1px'
-    }, className: 'glyphicon glyphicon-arrow-right',
-      onClick: () => columnMoveHandler(moveSide.RIGHT, column.name) }) : null);
+    return React.createElement(
+        'th',
+        { key: column.name, style: style, className: column.inFilterExpression ? "active" : "" },
+        !first ? React.createElement('span', { className: 'glyphicon glyphicon-arrow-left',
+          onClick: () => columnMoveHandler(moveSide.LEFT, column.name) }) : null,
+        '\xA0',
+        React.createElement('span', { className: this.orderingIconClass(column.name, orderedByColumn),
+          onClick: () => columnOrderingHandler(column.name) }),
+        '\xA0',
+        column.name,
+        ' ',
+        !last && notLast ? React.createElement('span', { style: {
+          float: 'right',
+          marginRight: '-15px',
+          marginTop: '1px'
+        }, className: 'glyphicon glyphicon-arrow-right',
+          onClick: () => columnMoveHandler(moveSide.RIGHT, column.name) }) : null
+    );
   }
 }
 
@@ -1517,20 +1546,117 @@ class FilterView extends React.Component {
     super(props);
   }
 
+  componentWillMount() {
+    this.setState({ query: this.props.table.getFilterExpression() });
+  }
+
+  mutateQuery(query) {
+    this.setState({ query });
+  }
+
+  applyQuery() {
+    this.props.filterHandler(this.state.query);
+  }
+
   render() {
-    let { table, filterHandler, columnsVisibilityHandler, resetOrdering, resetColumnOrdering } = this.props;
-    return React.createElement('div', { className: 'panel-group', id: 'table-filtering-accordion',
-      role: 'tablist', 'aria-multiselectable': 'true' }, React.createElement('div', { className: 'panel panel-default' }, React.createElement('div', { className: 'panel-heading', role: 'tab', id: 'headingFiltering' }, React.createElement('a', { className: 'collapsed', role: 'button', 'data-toggle': 'collapse',
-      'data-parent': '#accordion', href: '#collapseFiltering',
-      'aria-expanded': 'false', 'aria-controls': 'collapseFiltering' }, React.createElement('h4', { className: 'panel-title' }, 'Table Filtering'))), React.createElement('div', { id: 'collapseFiltering', className: 'panel-collapse collapse',
-      role: 'tabpanel', 'aria-labelledby': 'headingFiltering' }, React.createElement('div', { className: 'panel-body' }, React.createElement(QueryInput, { table: table,
-      onChange: filterHandler,
-      query: table.getFilterExpression(),
-      error: table.getFilterError() }), React.createElement(ColumnsVisibility, { columns: table.columns,
-      onChange: columnsVisibilityHandler }), React.createElement('div', {
-      className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' }, React.createElement('label', { className: 'control-label' }, 'Reset'), React.createElement('br', null), React.createElement('div', { className: 'row' }, React.createElement('div', { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' }, React.createElement('button', { type: 'button', className: 'btn btn-danger',
-      onClick: resetOrdering }, 'Ordering by value')), React.createElement('div', { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' }), React.createElement('div', { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' }, React.createElement('button', { type: 'button', className: 'btn btn-danger',
-      onClick: resetColumnOrdering }, 'Column position'))))))));
+    let { table, columnsVisibilityHandler, resetOrdering, resetColumnOrdering } = this.props;
+
+    let { query } = this.state;
+
+    return React.createElement(
+        'div',
+        { className: 'panel-group', id: 'table-filtering-accordion',
+          role: 'tablist', 'aria-multiselectable': 'true' },
+        React.createElement(
+            'div',
+            { className: 'panel panel-default' },
+            React.createElement(
+                'div',
+                { className: 'panel-heading', role: 'tab', id: 'headingFiltering' },
+                React.createElement(
+                    'a',
+                    { className: 'collapsed', role: 'button', 'data-toggle': 'collapse',
+                      'data-parent': '#accordion', href: '#collapseFiltering',
+                      'aria-expanded': 'false', 'aria-controls': 'collapseFiltering' },
+                    React.createElement(
+                        'h4',
+                        { className: 'panel-title' },
+                        'Table Filtering'
+                    )
+                )
+            ),
+            React.createElement(
+                'div',
+                { id: 'collapseFiltering', className: 'panel-collapse collapse',
+                  role: 'tabpanel', 'aria-labelledby': 'headingFiltering' },
+                React.createElement(
+                    'div',
+                    { className: 'panel-body' },
+                    React.createElement(QueryInput, { table: table,
+                      onChange: value => this.mutateQuery(value),
+                      query: query,
+                      error: table.getFilterError() }),
+                    React.createElement(
+                        'div',
+                        {
+                          className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+                        React.createElement(
+                            'div',
+                            { className: 'row' },
+                            React.createElement(
+                                'div',
+                                { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
+                                React.createElement(
+                                    'button',
+                                    { type: 'button', className: 'btn btn-success',
+                                      onClick: () => this.applyQuery() },
+                                    'Apply query'
+                                )
+                            )
+                        )
+                    ),
+                    React.createElement(ColumnsVisibility, { columns: table.columns,
+                      onChange: columnsVisibilityHandler }),
+                    React.createElement(
+                        'div',
+                        {
+                          className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+                        React.createElement(
+                            'label',
+                            { className: 'control-label' },
+                            'Reset'
+                        ),
+                        React.createElement('br', null),
+                        React.createElement(
+                            'div',
+                            { className: 'row' },
+                            React.createElement(
+                                'div',
+                                { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
+                                React.createElement(
+                                    'button',
+                                    { type: 'button', className: 'btn btn-danger',
+                                      onClick: resetOrdering },
+                                    'Ordering by value'
+                                )
+                            ),
+                            React.createElement('div', { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' }),
+                            React.createElement(
+                                'div',
+                                { className: 'col-sm-1 col-md-1 col-lg-1 col-xs-1' },
+                                React.createElement(
+                                    'button',
+                                    { type: 'button', className: 'btn btn-danger',
+                                      onClick: resetColumnOrdering },
+                                    'Column position'
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    );
   }
 }
 
@@ -1657,31 +1783,39 @@ class Header extends React.Component {
     let { columns, columnOrderingHandler, orderingColumn, columnMoveHandler } = this.props;
     let { columnsWidth } = this.state;
 
-    return React.createElement('thead', null, React.createElement('tr', null, columns.filter(column => column.visibility).map((column, idx, collection) => {
+    return React.createElement(
+        'thead',
+        null,
+        React.createElement(
+            'tr',
+            null,
+            columns.filter(column => column.visibility).map((column, idx, collection) => {
 
-      const notLast = idx < collection.length - 1;
-      const last = idx === collection.length;
-      const first = idx === 0;
+              const notLast = idx < collection.length - 1;
+              const last = idx === collection.length;
+              const first = idx === 0;
 
-      let result = [React.createElement(ColumnView, {
-        column: column,
-        orderedByColumn: orderingColumn,
-        notLast: notLast,
-        last: last,
-        first: first,
-        width: columnsWidth[column.name],
-        order: this.state.order,
-        columnMoveHandler: columnMoveHandler,
-        columnOrderingHandler: columnName => columnOrderingHandler(columnName, this.toggleOrdering(columnName)) })];
+              let result = [React.createElement(ColumnView, {
+                column: column,
+                orderedByColumn: orderingColumn,
+                notLast: notLast,
+                last: last,
+                first: first,
+                width: columnsWidth[column.name],
+                order: this.state.order,
+                columnMoveHandler: columnMoveHandler,
+                columnOrderingHandler: columnName => columnOrderingHandler(columnName, this.toggleOrdering(columnName)) })];
 
-      if (notLast) {
-        result.push(React.createElement(ColumnResizerView, {
-          handleWidthChange: (curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)
-        }));
-      }
+              if (notLast) {
+                result.push(React.createElement(ColumnResizerView, {
+                  handleWidthChange: (curX, initX) => this.handleWidthChange(curX, initX, column.name, collection[idx + 1].name)
+                }));
+              }
 
-      return result;
-    })));
+              return result;
+            })
+        )
+    );
   }
 }
 
@@ -1693,7 +1827,16 @@ class PaginationView extends React.Component {
   renderPageCounter(table, handlePageSet) {
     let pages = [];
     for (let counter = 1; counter < table.getMaxPage() + 1; counter++) {
-      pages.push(React.createElement('li', { key: counter, className: counter === table.currentPage ? 'active' : '' }, React.createElement('a', { onClick: () => handlePageSet(counter) }, counter, React.createElement('span', { className: 'sr-only' }))));
+      pages.push(React.createElement(
+          'li',
+          { key: counter, className: counter === table.currentPage ? 'active' : '' },
+          React.createElement(
+              'a',
+              { onClick: () => handlePageSet(counter) },
+              counter,
+              React.createElement('span', { className: 'sr-only' })
+          )
+      ));
     }
     return pages;
   }
@@ -1713,15 +1856,94 @@ class PaginationView extends React.Component {
         setPageSize,
         showSelect
     } = this.props;
-    return React.createElement('div', { className: 'row' }, React.createElement('div', {
-      className: PaginationView.makeClassLine("col-sm-2 col-md-2 col-lg-2 col-xs-2", showSelect) }, React.createElement('div', { className: 'form-group' }, React.createElement('label', { htmlFor: 'table-page-size-selec' }, 'Page size:'), React.createElement('select', {
-      className: 'form-control',
-      id: 'table-page-size-select',
-      value: table.pageSize,
-      onChange: evt => {
-        setPageSize(evt.target.value);
-      } }, React.createElement('option', { value: '10' }, '10'), React.createElement('option', { value: '25' }, '25'), React.createElement('option', { value: '50' }, '50'), React.createElement('option', { value: '100' }, '100')))), React.createElement('div', { className: 'col-sm-10 col-md-10 col-lg-10 col-xs-10' }, React.createElement('nav', { 'aria-label': '...', style: { paddingTop: '5px' } }, React.createElement('ul', { className: 'pagination' }, React.createElement('li', { className: table.currentPage === 1 ? 'disabled' : '' }, React.createElement('a', { 'aria-label': 'Previous', onClick: () => handlePageSet(1) }, React.createElement('span', { 'aria-hidden': 'true' }, '\xAB'))), this.renderPageCounter(table, handlePageSet), React.createElement('li', { className: table.currentPage < table.getMaxPage() ? '' : 'disabled' }, React.createElement('a', { 'aria-label': 'Next',
-      onClick: () => handlePageSet(table.getMaxPage()) }, React.createElement('span', { 'aria-hidden': 'true' }, '\xBB')))))));
+    return React.createElement(
+        'div',
+        { className: 'row' },
+        React.createElement(
+            'div',
+            {
+              className: PaginationView.makeClassLine("col-sm-2 col-md-2 col-lg-2 col-xs-2", showSelect) },
+            React.createElement(
+                'div',
+                { className: 'form-group' },
+                React.createElement(
+                    'label',
+                    { htmlFor: 'table-page-size-selec' },
+                    'Page size:'
+                ),
+                React.createElement(
+                    'select',
+                    {
+                      className: 'form-control',
+                      id: 'table-page-size-select',
+                      value: table.pageSize,
+                      onChange: evt => {
+                        setPageSize(evt.target.value);
+                      } },
+                    React.createElement(
+                        'option',
+                        { value: '10' },
+                        '10'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: '25' },
+                        '25'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: '50' },
+                        '50'
+                    ),
+                    React.createElement(
+                        'option',
+                        { value: '100' },
+                        '100'
+                    )
+                )
+            )
+        ),
+        React.createElement(
+            'div',
+            { className: 'col-sm-10 col-md-10 col-lg-10 col-xs-10' },
+            React.createElement(
+                'nav',
+                { 'aria-label': '...', style: { paddingTop: '5px' } },
+                React.createElement(
+                    'ul',
+                    { className: 'pagination' },
+                    React.createElement(
+                        'li',
+                        { className: table.currentPage === 1 ? 'disabled' : '' },
+                        React.createElement(
+                            'a',
+                            { 'aria-label': 'Previous', onClick: () => handlePageSet(1) },
+                            React.createElement(
+                                'span',
+                                { 'aria-hidden': 'true' },
+                                '\xAB'
+                            )
+                        )
+                    ),
+                    this.renderPageCounter(table, handlePageSet),
+                    React.createElement(
+                        'li',
+                        { className: table.currentPage < table.getMaxPage() ? '' : 'disabled' },
+                        React.createElement(
+                            'a',
+                            { 'aria-label': 'Next',
+                              onClick: () => handlePageSet(table.getMaxPage()) },
+                            React.createElement(
+                                'span',
+                                { 'aria-hidden': 'true' },
+                                '\xBB'
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    );
   }
 }
 
@@ -1810,23 +2032,73 @@ class QueryInput extends React.Component {
 
     let { tab, step, query: simpleQuery } = this.state;
 
-    return React.createElement('div', null, React.createElement('ul', { className: 'nav nav-tabs', role: 'tablist' }, React.createElement('li', { role: 'presentation',
-      className: tab === selectedTab.SIMPLE ? 'active' : '' }, React.createElement('a', { onClick: e => this.changeTab(selectedTab.SIMPLE), role: 'tab' }, 'Simple query')), React.createElement('li', { role: 'presentation',
-      className: tab === selectedTab.RAW ? 'active' : '' }, React.createElement('a', { onClick: e => this.changeTab(selectedTab.RAW), role: 'tab' }, 'Raw query'))), React.createElement('div', { className: 'tab-content' }, React.createElement('div', { role: 'tabpanel',
-      className: tab === selectedTab.SIMPLE ? 'tab-pane active' : 'tab-pane' }, React.createElement('br', null), React.createElement(SimpleQueryInput, { gotoStep: step => this.gotoStep(step),
-      updateState: item => this.updateState(item),
-      step: step,
-      rewindStep: () => this.rewindStep(onChange),
-      query: simpleQuery,
-      table: table,
-      exportQuery: value => onChange(value) })), React.createElement('div', { role: 'tabpanel',
-      className: tab === selectedTab.RAW ? 'tab-pane active' : 'tab-pane' }, React.createElement('br', null), React.createElement('div', {
-      className: QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError) }, React.createElement('label', { htmlFor: 'tableViewFilterQuery' }, 'Filter Query'), React.createElement('input', {
-      id: 'tableViewFilterQuery',
-      type: 'text',
-      className: 'form-control',
-      onChange: evt => this.handleRawQueryUpdate(evt.target.value),
-      value: query })))));
+    return React.createElement(
+        'div',
+        null,
+        React.createElement(
+            'ul',
+            { className: 'nav nav-tabs', role: 'tablist' },
+            React.createElement(
+                'li',
+                { role: 'presentation',
+                  className: tab === selectedTab.SIMPLE ? 'active' : '' },
+                React.createElement(
+                    'a',
+                    { onClick: e => this.changeTab(selectedTab.SIMPLE), role: 'tab' },
+                    'Simple query'
+                )
+            ),
+            React.createElement(
+                'li',
+                { role: 'presentation',
+                  className: tab === selectedTab.RAW ? 'active' : '' },
+                React.createElement(
+                    'a',
+                    { onClick: e => this.changeTab(selectedTab.RAW), role: 'tab' },
+                    'Raw query'
+                )
+            )
+        ),
+        React.createElement(
+            'div',
+            { className: 'tab-content' },
+            React.createElement(
+                'div',
+                { role: 'tabpanel',
+                  className: tab === selectedTab.SIMPLE ? 'tab-pane active' : 'tab-pane' },
+                React.createElement('br', null),
+                React.createElement(SimpleQueryInput, { gotoStep: step => this.gotoStep(step),
+                  updateState: item => this.updateState(item),
+                  step: step,
+                  rewindStep: () => this.rewindStep(onChange),
+                  query: simpleQuery,
+                  table: table,
+                  exportQuery: value => onChange(value) })
+            ),
+            React.createElement(
+                'div',
+                { role: 'tabpanel',
+                  className: tab === selectedTab.RAW ? 'tab-pane active' : 'tab-pane' },
+                React.createElement('br', null),
+                React.createElement(
+                    'div',
+                    {
+                      className: QueryInput.addErrorClass('form-group col-sm-12 col-md-12 col-lg-12 col-xs-12', hasError) },
+                    React.createElement(
+                        'label',
+                        { htmlFor: 'tableViewFilterQuery' },
+                        'Filter Query'
+                    ),
+                    React.createElement('input', {
+                      id: 'tableViewFilterQuery',
+                      type: 'text',
+                      className: 'form-control',
+                      onChange: evt => this.handleRawQueryUpdate(evt.target.value),
+                      value: query })
+                )
+            )
+        )
+    );
   }
 }
 
@@ -1842,7 +2114,15 @@ class RowView extends React.Component {
      */
     let row = this.props.row;
 
-    return React.createElement('tr', null, row.columns.map(column => column.visibility ? React.createElement('td', { colSpan: '2' }, row.getValue(column)) : null));
+    return React.createElement(
+        'tr',
+        null,
+        row.columns.map(column => column.visibility ? React.createElement(
+            'td',
+            { colSpan: '2' },
+            row.getValue(column)
+        ) : null)
+    );
   }
 }
 
@@ -1987,42 +2267,134 @@ class SimpleQueryInput extends React.Component {
 
   renderChooseColumn(table, handler) {
     let columns = table.columns;
-    return React.createElement('div', { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' }, React.createElement('label', { className: 'control-label' }, 'Choose column'), React.createElement('br', null), React.createElement('div', { className: 'btn-group', role: 'group' }, columns.map(column => React.createElement('button', { key: column.name, type: 'button',
-      className: 'btn btn-default',
-      onClick: e => handler(column.name) }, column.name))));
+    return React.createElement(
+        'div',
+        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'Choose column'
+        ),
+        React.createElement('br', null),
+        React.createElement(
+            'div',
+            { className: 'btn-group', role: 'group' },
+            columns.map(column => React.createElement(
+                'button',
+                { key: column.name, type: 'button',
+                  className: 'btn btn-default',
+                  onClick: e => handler(column.name) },
+                column.name
+            ))
+        )
+    );
   }
 
   renderChooseAction(handler) {
-    return React.createElement('div', { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' }, React.createElement('label', { className: 'control-label' }, 'Choose operator'), React.createElement('br', null), React.createElement('div', { className: 'btn-group', role: 'group' }, Object.keys(actions).map(key => {
-      const action = actions[key];
-      return React.createElement('button', { key: action.view, type: 'button',
-        className: 'btn btn-default',
-        onClick: e => handler(action) }, action.view);
-    })));
+    return React.createElement(
+        'div',
+        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'Choose operator'
+        ),
+        React.createElement('br', null),
+        React.createElement(
+            'div',
+            { className: 'btn-group', role: 'group' },
+            Object.keys(actions).map(key => {
+              const action = actions[key];
+              return React.createElement(
+                  'button',
+                  { key: action.view, type: 'button',
+                    className: 'btn btn-default',
+                    onClick: e => handler(action) },
+                  action.view
+              );
+            })
+        )
+    );
   }
 
   renderChooseValue(table, handler) {
     let columns = table.columns;
     let { manualValue } = this.state;
-    return React.createElement('div', { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' }, React.createElement('label', { className: 'control-label' }, 'Input value'), React.createElement('div', { className: 'input-group' }, React.createElement('input', { type: 'text', className: 'form-control',
-      value: manualValue,
-      onChange: evt => {
-        this.setState({ manualValue: evt.target.value });
-      },
-      placeholder: '' }), React.createElement('span', { className: 'input-group-btn ' }, React.createElement('button', { className: 'btn btn-default',
-      onClick: evt => handler({ value: manualValue }),
-      type: 'button' }, 'Ok'))), React.createElement('label', { className: 'control-label' }, 'or choose column'), React.createElement('br', null), React.createElement('div', { className: 'btn-group', role: 'group' }, columns.map(column => React.createElement('button', { key: column.name, type: 'button',
-      className: 'btn btn-default',
-      onClick: e => handler({ column: column.name }) }, column.name))), React.createElement('br', null));
+    return React.createElement(
+        'div',
+        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'Input value'
+        ),
+        React.createElement(
+            'div',
+            { className: 'input-group' },
+            React.createElement('input', { type: 'text', className: 'form-control',
+              value: manualValue,
+              onChange: evt => {
+                this.setState({ manualValue: evt.target.value });
+              },
+              placeholder: '' }),
+            React.createElement(
+                'span',
+                { className: 'input-group-btn ' },
+                React.createElement(
+                    'button',
+                    { className: 'btn btn-default',
+                      onClick: evt => handler({ value: manualValue }),
+                      type: 'button' },
+                    'Ok'
+                )
+            )
+        ),
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'or choose column'
+        ),
+        React.createElement('br', null),
+        React.createElement(
+            'div',
+            { className: 'btn-group', role: 'group' },
+            columns.map(column => React.createElement(
+                'button',
+                { key: column.name, type: 'button',
+                  className: 'btn btn-default',
+                  onClick: e => handler({ column: column.name }) },
+                column.name
+            ))
+        ),
+        React.createElement('br', null)
+    );
   }
 
   renderChooseLogic(handler) {
-    return React.createElement('div', { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' }, React.createElement('label', { className: 'control-label' }, 'Choose logic operator'), React.createElement('br', null), React.createElement('div', { className: 'btn-group', role: 'group' }, Object.keys(logicActions).map(key => {
-      const { view } = logicActions[key];
-      return React.createElement('button', { key: view, type: 'button',
-        className: 'btn btn-default',
-        onClick: e => handler(view) }, view);
-    })));
+    return React.createElement(
+        'div',
+        { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+        React.createElement(
+            'label',
+            { className: 'control-label' },
+            'Choose logic operator'
+        ),
+        React.createElement('br', null),
+        React.createElement(
+            'div',
+            { className: 'btn-group', role: 'group' },
+            Object.keys(logicActions).map(key => {
+              const { view } = logicActions[key];
+              return React.createElement(
+                  'button',
+                  { key: view, type: 'button',
+                    className: 'btn btn-default',
+                    onClick: e => handler(view) },
+                  view
+              );
+            })
+        )
+    );
   }
 
   renderNeededHelper(table, exportQuery) {
@@ -2044,11 +2416,39 @@ class SimpleQueryInput extends React.Component {
 
     let { table, exportQuery, query, rewindStep } = this.props;
 
-    return React.createElement('div', null, React.createElement('div', { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' }, React.createElement('label', { className: 'control-label' }, 'Resulting query'), React.createElement('br', null), React.createElement('div', { className: 'input-group' }, React.createElement('input', { type: 'text', disabled: true, className: 'form-control',
-      placeholder: '', value: query.value }), React.createElement('span', { className: 'input-group-btn' }, React.createElement('button', { className: 'btn btn-default',
-      disabled: query.items.length === 0,
-      onClick: () => rewindStep(exportQuery),
-      type: 'button' }, 'Backspace')))), this.renderNeededHelper(table, exportQuery));
+    return React.createElement(
+        'div',
+        null,
+        React.createElement(
+            'div',
+            { className: 'form-group col-sm-12 col-md-12 col-lg-12 col-xs-12' },
+            React.createElement(
+                'label',
+                { className: 'control-label' },
+                'Resulting query'
+            ),
+            React.createElement('br', null),
+            React.createElement(
+                'div',
+                { className: 'input-group' },
+                React.createElement('input', { type: 'text', disabled: true, className: 'form-control',
+                  placeholder: '', value: query.value }),
+                React.createElement(
+                    'span',
+                    { className: 'input-group-btn' },
+                    React.createElement(
+                        'button',
+                        { className: 'btn btn-default',
+                          disabled: query.items.length === 0,
+                          onClick: () => rewindStep(exportQuery),
+                          type: 'button' },
+                        'Backspace'
+                    )
+                )
+            )
+        ),
+        this.renderNeededHelper(table, exportQuery)
+    );
   }
 }
 
@@ -2136,23 +2536,38 @@ class TableView extends React.Component {
   render() {
     let { td: table } = this.state;
     if (table.columns.length > 0) {
-      return React.createElement('div', { className: 'container-fluid' }, React.createElement(FilterView, {
-        table: table,
-        filterHandler: expr => this.filterHandler(expr),
-        columnsVisibilityHandler: (column, value) => this.columnsVisibilityHandler(column, value),
-        resetOrdering: () => this.resetOrdering(),
-        resetColumnOrdering: () => this.columnMoveReset() }), React.createElement('table', { className: 'table table-responsive table-bordered' }, React.createElement(Header, {
-        columnMoveHandler: (s, c) => {
-          this.columnMoveHandler(s, c);
-        },
-        columns: table.columns,
-        visibleColumns: table.columns.filter(col => col.visibility),
-        columnOrderingHandler: (columnName, order) => this.columnOrderingHandler(columnName, order),
-        orderingColumn: table.ordering.column }), React.createElement('tbody', null, table.exportRows().map(row => React.createElement(RowView, { key: row.key,
-        row: row })))), React.createElement(PaginationView, { table: table,
-        showSelect: true,
-        setPageSize: pageSize => this.setPageSize(pageSize),
-        handlePageSet: pageNum => this.handlePageSet(pageNum) }));
+      return React.createElement(
+          'div',
+          { className: 'container-fluid' },
+          React.createElement(FilterView, {
+            table: table,
+            filterHandler: expr => this.filterHandler(expr),
+            columnsVisibilityHandler: (column, value) => this.columnsVisibilityHandler(column, value),
+            resetOrdering: () => this.resetOrdering(),
+            resetColumnOrdering: () => this.columnMoveReset() }),
+          React.createElement(
+              'table',
+              { className: 'table table-responsive table-bordered' },
+              React.createElement(Header, {
+                columnMoveHandler: (s, c) => {
+                  this.columnMoveHandler(s, c);
+                },
+                columns: table.columns,
+                visibleColumns: table.columns.filter(col => col.visibility),
+                columnOrderingHandler: (columnName, order) => this.columnOrderingHandler(columnName, order),
+                orderingColumn: table.ordering.column }),
+              React.createElement(
+                  'tbody',
+                  null,
+                  table.exportRows().map(row => React.createElement(RowView, { key: row.key,
+                    row: row }))
+              )
+          ),
+          React.createElement(PaginationView, { table: table,
+            showSelect: true,
+            setPageSize: pageSize => this.setPageSize(pageSize),
+            handlePageSet: pageNum => this.handlePageSet(pageNum) })
+      );
     }
     return null;
   }
