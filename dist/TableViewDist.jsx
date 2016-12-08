@@ -212,8 +212,8 @@ const parser = (function () {
         peg$c31 = function (chars) {
           return chars.join("");
         },
-        peg$c32 = /^[a-zA-Z0-9<>.[\]@#$%\^-_+ ]/,
-        peg$c33 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "<", ">", ".", "[", "]", "@", "#", "$", "%", ["^", "_"], "+", " "], false, false),
+        peg$c32 = /^[a-zA-Z0-9<>.[\]@#$%\^\-_+ ]/,
+        peg$c33 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "<", ">", ".", "[", "]", "@", "#", "$", "%", "^", "-", "_", "+", " "], false, false),
         peg$c34 = /^[ \t\n\r]/,
         peg$c35 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
         peg$c36 = "\"",
@@ -911,6 +911,51 @@ class Column {
 
 }
 
+/**
+ * @param str {String}
+ * @returns {Date}
+ */
+const parseDate = (str) => {
+  let date = new Date();
+
+  let parts = str.split(':');
+
+  if (parts.length === 3) {
+    date.setHours(parts[0]);
+    date.setMinutes(parts[1]);
+    date.setSeconds(parts[2]);
+    return date;
+  } else {
+    throw new TypeError('Wrong date format in cell');
+  }
+};
+
+/**
+ * @param date {Date}
+ * @param minutes {int}
+ * @returns {number}
+ */
+const plusMinutes = (date, minutes) => {
+  let ms = date.getTime();
+  return ms + minutes * 60 * 1000;
+};
+
+/**
+ * @param exp {String}
+ * @returns {boolean}
+ */
+const isExpectationApplicable = (exp) => {
+  const groups = exp.split(' min');
+  return exp.endsWith(' min') && groups.length === 2 && parseInt(groups[0]);
+};
+
+/**
+ * @param exp {String}
+ * @returns {number}
+ */
+const extractExpectation = (exp) => {
+  return parseInt(exp.split(' min')[0], 10);
+};
 
 class Filter {
 
@@ -920,7 +965,6 @@ class Filter {
    * @param lastFilterQuery {string}
    */
   constructor(availableColumns, parseWasOk, lastFilterQuery) {
-
 
     this.__parseWasOk = parseWasOk;
 
@@ -1053,10 +1097,14 @@ class Filter {
     let {col: columnName, act: action, exp: expectation} = term;
     return rows.filter((row) => {
       let value = row.getValueByColumnName(columnName);
-      let valueAsFloat = parseFloat(value);
-      let expectationAsFloat = parseFloat(expectation);
       if (value) {
-        return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
+        if (isExpectationApplicable(expectation)) {
+          let rowDate = plusMinutes(parseDate(value), extractExpectation(expectation));
+          let expectedDate = new Date().getTime();
+          return this.__SEARCH_SYNTAX[action](rowDate, expectedDate);
+        } else {
+          return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
+        }
       }
       return false;
     });
@@ -1127,7 +1175,7 @@ class Filter {
 }
 
 
-export const reduceAstToState = (ast) => {
+const reduceAstToState = (ast) => {
   if (Filter.__isExpressionValid(ast)) {
     ast['l'] = reduceAstToState(ast['l']);
     ast['r'] = reduceAstToState(ast['r']);
@@ -1543,7 +1591,7 @@ class ColumnsVisibility extends React.Component {
   }
 }
 
-export const moveSide = {
+const moveSide = {
   RIGHT: 'right',
   LEFT: 'left'
 }
@@ -1616,7 +1664,7 @@ class FilterView extends React.Component {
   }
 
 
-  componentWillMount()  {
+  componentWillMount() {
     this.setState({query: this.props.table.getFilterExpression()});
   }
 
@@ -1627,7 +1675,6 @@ class FilterView extends React.Component {
   applyQuery() {
     this.props.filterHandler(this.state.query);
   }
-
 
 
   render() {
@@ -2112,7 +2159,7 @@ class RowView extends React.Component {
 }
 
 
-export const queryToState = (query) => {
+const queryToState = (query) => {
   if (query.trim() != '') {
     try {
       let ast = parser.parse(query);
@@ -2135,19 +2182,19 @@ export const queryToState = (query) => {
   }
 };
 
-export const step = {
+ const step = {
   COLUMN: 'choose-column',
   ACTION: 'choose-action',
   VALUE: 'choose-value',
   LOGIC: 'chose-logic-actions'
 };
 
-export const actionType = {
+ const actionType = {
   SIMPLE: 'simple',
   PARAM: 'param'
 };
 
-export const logicActions = {
+ const logicActions = {
   and: {
     view: '&&'
   },
@@ -2156,7 +2203,7 @@ export const logicActions = {
   }
 };
 
-export const actions = {
+ const actions = {
   l: {
     view: '<',
     type: actionType.PARAM
@@ -2299,11 +2346,23 @@ class SimpleQueryInput extends React.Component {
                      this.setState({manualValue: evt.target.value})
                    }}
                    placeholder=""/>
-            <span className="input-group-btn ">
-                <button className="btn btn-default"
-                        onClick={(evt) => handler({value: manualValue})}
-                        type="button">Ok</button>
-              </span>
+            <div className="input-group-btn ">
+              <button className="btn btn-warning"
+                      onClick={(evt) => {
+                        let int = parseInt(manualValue);
+                        if (!isNaN(int)) {
+                          handler({
+                            value: manualValue + ' min'
+                          })
+                        }
+                      }}
+                      type="button">Minutes
+              </button>
+              <button className="btn btn-success"
+                      onClick={(evt) => handler({value: manualValue + ' min'})}
+                      type="button">Ok
+              </button>
+            </div>
           </div>
 
           <label className="control-label">or choose column</label>
@@ -2382,6 +2441,7 @@ class TableView extends React.Component {
   constructor(props) {
     super(props);
     this.bootstrapped = false;
+    this.redrawTimer = 0;
   }
 
   columnMoveHandler(side, columnName) {
@@ -2399,7 +2459,15 @@ class TableView extends React.Component {
   }
 
   filterHandler(expression) {
-    this.setState({td: this.state.td.setFilterExpression(expression)})
+    let self = this;
+    this.setState({td: this.state.td.setFilterExpression(expression)});
+    clearInterval(this.redrawTimer);
+
+    if (expression.indexOf(' min') !== -1) {
+      this.redrawTimer = setInterval(() => {
+        self.setState({td: this.state.td.setFilterExpression(expression)});
+      }, 5000)
+    }
   }
 
   columnsVisibilityHandler(column, value) {

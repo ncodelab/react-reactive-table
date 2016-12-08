@@ -37,7 +37,7 @@ var getPrice = function () {
 };
 
 var getAmount = function () {
-  return random(100, 110);
+  return random(-20, 20);
 };
 
 var getWeight = function () {
@@ -46,6 +46,10 @@ var getWeight = function () {
 
 var getHeight = function () {
   return random(20, 200);
+};
+
+var getTime = function () {
+  return '13:' + random(20,40) + ':00';
 };
 
 var columns = [
@@ -72,7 +76,7 @@ var randomRow = function(key) {
       case 'price with VAT':
         return {'column': column, 'value': getPrice() == 104 ? '': getPrice()};
       case 'amount':
-        return {'column': column, 'value': getAmount()};
+        return {'column': column, 'value': getTime()};
       case 'weight':
         return {'column': column, 'value': getWeight()};
       case 'height':

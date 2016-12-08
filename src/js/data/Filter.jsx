@@ -2,6 +2,53 @@ import {parser} from '../parser.jsx';
 import {copyObject} from './Util.jsx';
 import {step} from '../components/SimpleQueryInput.jsx';
 
+
+/**
+ * @param str {String}
+ * @returns {Date}
+ */
+const parseDate = (str) => {
+  let date = new Date();
+
+  let parts = str.split(':');
+
+  if (parts.length === 3) {
+    date.setHours(parts[0]);
+    date.setMinutes(parts[1]);
+    date.setSeconds(parts[2]);
+    return date;
+  } else {
+    throw new TypeError('Wrong date format in cell');
+  }
+};
+
+/**
+ * @param date {Date}
+ * @param minutes {int}
+ * @returns {number}
+ */
+const plusMinutes = (date, minutes) => {
+  let ms = date.getTime();
+  return ms + minutes * 60 * 1000;
+};
+
+/**
+ * @param exp {String}
+ * @returns {boolean}
+ */
+const isExpectationApplicable = (exp) => {
+  const groups = exp.split(' min');
+  return exp.endsWith(' min') && groups.length === 2 && parseInt(groups[0]);
+};
+
+/**
+ * @param exp {String}
+ * @returns {number}
+ */
+const extractExpectation = (exp) => {
+  return parseInt(exp.split(' min')[0], 10);
+};
+
 class Filter {
 
   /**
@@ -10,7 +57,6 @@ class Filter {
    * @param lastFilterQuery {string}
    */
   constructor(availableColumns, parseWasOk, lastFilterQuery) {
-
 
     this.__parseWasOk = parseWasOk;
 
@@ -42,16 +88,16 @@ class Filter {
      */
     this.__SEARCH_SYNTAX = {
       '<': (value, expectation) => {
-       return  parseFloat(value) < parseFloat(expectation)
+        return parseFloat(value) < parseFloat(expectation)
       },
       '<=': (value, expectation) => {
-        return  parseFloat(value) <= parseFloat(expectation)
+        return parseFloat(value) <= parseFloat(expectation)
       },
       '>': (value, expectation) => {
-        return  parseFloat(value) > parseFloat(expectation)
+        return parseFloat(value) > parseFloat(expectation)
       },
       '>=': (value, expectation) => {
-        return  parseFloat(value) >= parseFloat(expectation)
+        return parseFloat(value) >= parseFloat(expectation)
       },
       '=': (value, expectation) => {
         return value == expectation
@@ -143,10 +189,14 @@ class Filter {
     let {col: columnName, act: action, exp: expectation} = term;
     return rows.filter((row) => {
       let value = row.getValueByColumnName(columnName);
-      let valueAsFloat = parseFloat(value);
-      let expectationAsFloat = parseFloat(expectation);
       if (value) {
-        return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
+        if (isExpectationApplicable(expectation)) {
+          let rowDate = plusMinutes(parseDate(value), extractExpectation(expectation));
+          let expectedDate = new Date().getTime();
+          return this.__SEARCH_SYNTAX[action](rowDate, expectedDate);
+        } else {
+          return this.__SEARCH_SYNTAX[action](value.toString(), expectation.toString().trim());
+        }
       }
       return false;
     });
@@ -215,8 +265,6 @@ class Filter {
     });
   };
 }
-
-
 
 
 export const reduceAstToState = (ast) => {

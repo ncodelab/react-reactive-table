@@ -10,6 +10,7 @@ class TableView extends React.Component {
   constructor(props) {
     super(props);
     this.bootstrapped = false;
+    this.redrawTimer = 0;
   }
 
   columnMoveHandler(side, columnName) {
@@ -27,7 +28,15 @@ class TableView extends React.Component {
   }
 
   filterHandler(expression) {
-    this.setState({td: this.state.td.setFilterExpression(expression)})
+    let self = this;
+    this.setState({td: this.state.td.setFilterExpression(expression)});
+    clearInterval(this.redrawTimer);
+
+    if (expression.indexOf(' min') !== -1) {
+      this.redrawTimer = setInterval(() => {
+        self.setState({td: this.state.td.setFilterExpression(expression)});
+      }, 5000)
+    }
   }
 
   columnsVisibilityHandler(column, value) {

@@ -190,11 +190,23 @@ class SimpleQueryInput extends React.Component {
                      this.setState({manualValue: evt.target.value})
                    }}
                    placeholder=""/>
-            <span className="input-group-btn ">
-                <button className="btn btn-default"
-                        onClick={(evt) => handler({value: manualValue})}
-                        type="button">Ok</button>
-              </span>
+            <div className="input-group-btn ">
+              <button className="btn btn-warning"
+                      onClick={(evt) => {
+                        let int = parseInt(manualValue);
+                        if (!isNaN(int)) {
+                          handler({
+                            value: manualValue + ' min'
+                          })
+                        }
+                      }}
+                      type="button">Minutes
+              </button>
+              <button className="btn btn-success"
+                      onClick={(evt) => handler({value: manualValue + ' min'})}
+                      type="button">Ok
+              </button>
+            </div>
           </div>
 
           <label className="control-label">or choose column</label>
